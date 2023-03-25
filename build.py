@@ -2,21 +2,39 @@ import os
 import argparse
 import shutil
 import configparser
+import glob
 
-conf = "build.ini"
+confPath = ".\\build.ini"
+defineDelimeter = ","
 
-# global variables, move them to environment or something if you care
-src = "\\src"
-build = "\\.build"
-target = "main.exe"
+if (not os.path.isfile(confPath)):
+	print("cannot find build.ini file")
+	exit(1)
 
-compileFlags = "-Wconversion -Werror -std=c99 -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wall -Wno-missing-braces"
-#compileFlags = ""
-linkedLibs = "-lopengl32 -lglfw3 -lgdi32"
+config = configparser.ConfigParser()
+config.read(confPath)
+
+# collect basic data from config file
+compiler = config["build"]["compiler"]
+
+defines = ""
+for define in config["build"]["defines"].split(","):
+	if len(define) > 0:
+		defines += f"-D{define} "
+
+
+include = config["source"]["include"]
+src = config["source"]["sourceRoot"]
+build = config["build"]["buildFolder"]
+target = config["build"]["target"]
+
+defaultCompilerFlags = config["build"]["defaultCompilationFlags"]
+linkingFlags = config["build"]["linkingFlags"]
+linkedLibs = config["build"]["linkedLibs"]
 
 ignoreCompilerFail = False
 
-rootdir = os.getcwd()
+rootdir = os.getcwd().replace("\\", "/")
 
 def makeDirIfNotExisting(path: str):
 	if (not os.path.isdir(path)):
@@ -39,7 +57,7 @@ if (parsed.rebuild):
 		answer = input()
 	
 	if (answer == "Y"):
-		shutil.rmtree("." + build)
+		shutil.rmtree(build)
 
 if (parsed.ignore_comp_fail):
 	ignoreCompilerFail = True
@@ -47,80 +65,108 @@ if (parsed.ignore_comp_fail):
 # make build directory if it doesn't exist
 makeDirIfNotExisting(rootdir + build)
 
-sourceFiles = []
 
-print("searching for source files")
-# get all files we have to compile
-for p, dirs, files in os.walk(rootdir + src):
-	p = p + "\\"
-	for file in files:
-		if (file.endswith(".c")):
-			sourceFiles.append(p.removeprefix(rootdir + src) + file.removesuffix(".c"))
+def shouldCompile(file: str):
+	# i am aware this is ugly.
+	objectFile = f"{rootdir}{build}{file}.o".replace("./", "/")
+	sourceFile = f"{rootdir}{src}{file}.c".replace("./", "/")
 
-compilationFailed = False
+	# i'm aware that this could be 1 return, this is far more readable
+	if not os.path.isfile(objectFile):
+		return True
+	
+	if os.path.getmtime(objectFile) < os.path.getmtime(sourceFile):
+		return True
+
+	return False
 
 # compiles source file to appropriate directory in .build, creating one if need be
-def compileToObject(sourceFile: str):
-	print("compiling " + sourceFile.removeprefix("\\"))
+def compileToObject(sourceFile: str, compileFlags: str):
+	print("compiling " + sourceFile.removeprefix("/"))
 	startingDir = os.getcwd()
 	
 	os.chdir(rootdir + build)
 
-	split = sourceFile[::-1].split("\\", 1)
+	split = sourceFile[::-1].split("/", 1)
 
 	# expected input is in the style "[\path]\file". we reverse it because there's no split last, 
 	# split it by \ with at most 1 split and thereby get "[hatp\]". we then reverse this again
 	# to get \path, and use it to generate a folder and move to it if need be
 	if (len(split) == 2 and len(split[-1]) > 0):
 		subdir = split[-1][::-1]
-		makeDirIfNotExisting(rootdir + build + "\\" + subdir)
-		os.chdir(subdir.removeprefix("\\"))
+		makeDirIfNotExisting(f"{rootdir}{build}/{subdir}")
+		os.chdir(subdir.removeprefix("/"))
 
-	command = "gcc -c \"" + rootdir + src + sourceFile + ".c\" " + compileFlags
+	fixedFlags = compileFlags.replace("${defaultCompilationFlags}", defaultCompilerFlags)
+	fixedSrc = src.removeprefix(".")
+	command = f"{compiler} -I{include} {defines} -c \"{rootdir}{fixedSrc}{sourceFile}.c\" {fixedFlags}"
+
 	returnCode = os.system(command)
 
 	os.chdir(startingDir)
 	
 	return returnCode
 
-def isCompiledOlderThanSource(file: str):
-	return os.path.getmtime(rootdir + build + file + ".o") < os.path.getmtime(rootdir + src + file + ".c")
-
-# compiling
 print("begun compiling")
+
+compilationFailed = False
 compiledAnything = False
 
-for file in sourceFiles:
-	shouldCompile = False
+objectFiles = []
 
-	if (not os.path.isfile(rootdir + build + file + ".o") or isCompiledOlderThanSource(file)):
-		returnCode = compileToObject(file)
+# compile everything
+for section in config.sections():
 
-		compiledAnything = compiledAnything or returnCode == 0
-		compilationFailed = compilationFailed or returnCode != 0
+	# use only sections starting in c file
+	if section.startswith("c file"):
+
+		# windows likes its \\ paths
+		def fixPath(path):
+			return path.replace("\\", "/")
+
+		sourceFiles = list(map(fixPath, glob.glob(config[section]["path"], recursive=True)))
+
+		# if this section has an exclude pattern, apply it
+		if "exclude" in config[section]:
+			subtracting = set(glob.glob(config[section]["exclude"], recursive=True))
+			sourceFiles = list(set(sourceFiles) - subtracting)
+
+		# actually compile the things
+		for file in sourceFiles:
+			# glob returns a relative path, we wnat to strip the src so we can easily compare it
+			# to a build pair
+			file = file.removeprefix(src).removesuffix(".c")
+
+			if shouldCompile(file):
+				errorCode = compileToObject(file, config[section]["compilationFlags"])
+
+				compiledAnything = compiledAnything or errorCode == 0
+				compilationFailed = compilationFailed or errorCode != 0
+			
+			objectFiles.append(f"{build}{file}.o")
+
 
 if compilationFailed and not ignoreCompilerFail:
-	print("compilation failed, not running main. use --ignore-comp-fail if you want to run anyway")
+	print(f"compilation failed, not running {target}. use --ignore-comp-fail if you want to run anyway")
 	exit(1)
 
 elif compilationFailed:
-	print("compilation failed, running main anyway")
+	print(f"compilation failed, running {target} anyway")
+
+elif (compiledAnything or not os.path.isfile(f"{rootdir}/{target}")):
+	# linking step
+	print("building executable")
+	linking = ""
+
+	for file in objectFiles:
+		linking += file + " "
+
+	os.system(f"{compiler} -o {target} {linking} {linkedLibs} {linkingFlags}")
+
+	print(f"executable built, running {target}")
 
 else:
-	# linking step
-	if (compiledAnything or not os.path.isfile(rootdir + "\\" + target)):
-		print("building executable")
-		linking = ""
-
-		for file in sourceFiles:
-			linking += "." + build + file + ".o "
-
-		os.system("gcc -o " + target + " " + linking + " " + linkedLibs + " -Wall")
-
-		print("executable built, running " + target)
-
-	else:
-		print("executable up to date, running " + target)
+	print(f"executable up to date, running {target}")
 
 # run the thing
-os.system(".\\" + target)
+os.system(f"\"{os.path.join(rootdir, target)}\"")
