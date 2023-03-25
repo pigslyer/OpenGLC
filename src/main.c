@@ -1,10 +1,10 @@
-#include "helpers/filehelper.h"
-#include "rendering/shaders.h"
-#include "rendering/drawing.h"
+#include <helpers/filehelper.h>
+#include <rendering/shaders.h>
+#include <rendering/drawing.h>
 
-#include "global.h"
-#include "player.h"
-#include "level.h"
+#include <global.h>
+#include <player.h>
+#include <level.h>
 
 
 void runInits(void);

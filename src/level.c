@@ -1,5 +1,5 @@
-#include "level.h"
-#include "player.h"
+#include <level.h>
+#include <player.h>
 
 #define POWER_OF_SIZE 6
 #define CELL_SIZE (1 << POWER_OF_SIZE)

@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "helpers/mathhelper.h"
+#include <helpers/mathhelper.h>
 
 #define F(of) ((float) (of))
 #define I(of) ((int) (of))

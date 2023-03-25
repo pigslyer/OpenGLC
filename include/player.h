@@ -1,7 +1,7 @@
 #ifndef PLAYER_H_SEEN
 #define PLAYER_H_SEEN
 
-#include "global.h"
+#include <global.h>
 
 extern vec2f playerPosition;
 extern float playerRotation;

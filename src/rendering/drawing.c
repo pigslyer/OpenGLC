@@ -1,8 +1,8 @@
-#include "drawing.h"
+#include <rendering/drawing.h>
+#include <rendering/shaders.h>
+#include <rendering/vboManager.h>
 
-#include "../helpers/filehelper.h"
-#include "shaders.h"
-#include "vboManager.h"
+#include <helpers/filehelper.h>
 
 struct texture
 {

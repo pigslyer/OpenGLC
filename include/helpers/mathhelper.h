@@ -1,7 +1,7 @@
 #ifndef MATHHELPER_H_SEEN
 #define MATHHELPER_H_SEEN
 
-#include "../global.h"
+#include <global.h>
 
 #define PI 3.1415926535
 #define TAU PI * 2

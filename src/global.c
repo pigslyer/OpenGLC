@@ -1,4 +1,4 @@
-#include "global.h"
+#include <global.h>
 
 
 const int SCREEN_WIDTH = 800;

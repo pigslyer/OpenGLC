@@ -1,7 +1,7 @@
 #ifndef VBO_MANAGER_H_SEEN
 #define VBO_MANAGER_H_SEEN
 
-#include "../global.h"
+#include <global.h>
 
 struct vboManager
 {

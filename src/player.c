@@ -1,5 +1,5 @@
-#include "player.h"
-#include "level.h"
+#include <player.h>
+#include <level.h>
 
 #define PLAYER_MOVEMENT_SPEED 5
 #define PLAYER_TURN_SPEED 0.08f

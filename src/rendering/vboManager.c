@@ -1,4 +1,4 @@
-#include "vboManager.h"
+#include <rendering/vboManager.h>
 
 vboManager* initVboMan(int capacity, void (*initVAO)(void))
 {

@@ -1,5 +1,5 @@
-#include "shaders.h"
-#include "../helpers/filehelper.h"
+#include <rendering/shaders.h>
+#include <helpers/filehelper.h>
 
 #define ON_FAILED exit(1)
 

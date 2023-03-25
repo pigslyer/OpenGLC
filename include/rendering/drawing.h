@@ -1,7 +1,7 @@
 #ifndef DRAWING_H_SEEN
 #define DRAWING_H_SEEN
 
-#include "../global.h"
+#include <global.h>
 
 void drawInit(void);
 void drawTerminate(void);

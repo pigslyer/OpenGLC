@@ -1,7 +1,7 @@
 #ifndef LEVEL_H_SEEN
 #define LEVEL_H_SEEN
 
-#include "global.h"
+#include <global.h>
 
 struct rayData
 {
