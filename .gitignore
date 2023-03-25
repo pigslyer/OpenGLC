@@ -1,4 +1,8 @@
-main.exe
+*.exe
 .vscode/
 .build/
+lib/
+include/
 share/
+
+glad.c
