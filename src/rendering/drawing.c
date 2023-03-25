@@ -92,16 +92,16 @@ void drawClear(void)
 void drawText(char* text, int length, vec2f pos, vec2f size)
 {
 	// 6 - 3 for each of the two triangles per character, 8 - 2 for each vertex UV, 2 for atlas UV 
-	const int INDEX_PER_CHAR = 6 * (2 + 2);
+	const unsigned long long INDEX_PER_CHAR = 6 * (2 + 2);
 
 	vec2f curPos = pos, curUV;
 	vec2f sizePerChar = (vec2f) {size.x / F(length), size.y};
 	vec2f sizePerTile = (vec2f) {1.0f / F(CHARACTER_COUNT_HOR), 1.0f / F(CHARACTER_COUNT_VERT)};
 
-	float* vertexData = (float*) malloc((size_t) (length * INDEX_PER_CHAR) * sizeof(float));
+	float* vertexData = (float*) malloc((size_t) ((unsigned long long)length * INDEX_PER_CHAR) * sizeof(float));
 
 	char temp;
-	int offset = 0;
+	long long unsigned offset = 0;
 	int visibleCharacterCount = 0;
 	for (int i = 0; i < length; i++)
 	{
@@ -127,7 +127,7 @@ void drawText(char* text, int length, vec2f pos, vec2f size)
 
 			// temp holds lowercase letter
 			temp = (text[i] | 32) - 'a';
-			curUV = (vec2f) { F(temp % CHARACTER_COUNT_HOR) / F(CHARACTER_COUNT_HOR), 1.0 - F((temp) / CHARACTER_COUNT_HOR + 1) / F(CHARACTER_COUNT_VERT)};
+			curUV = (vec2f) { F(temp % CHARACTER_COUNT_HOR) / F(CHARACTER_COUNT_HOR), 1.0f - F((temp) / CHARACTER_COUNT_HOR + 1) / F(CHARACTER_COUNT_VERT)};
 			break;
 		}
 
@@ -176,7 +176,7 @@ void drawText(char* text, int length, vec2f pos, vec2f size)
 
 	bindUnusedVbo(stringVboManager);
 
-	glBufferData(GL_ARRAY_BUFFER, length * INDEX_PER_CHAR * sizeof(float), vertexData, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)((size_t)length * INDEX_PER_CHAR * sizeof(float)), vertexData, GL_DYNAMIC_DRAW);
 
 	glUseProgram(shaders[AtlasShader]);
 

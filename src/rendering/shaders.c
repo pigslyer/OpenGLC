@@ -8,7 +8,7 @@ bool checkProgramInfoLog(unsigned int program, GLenum status);
 
 unsigned int loadShader(const char* const vertexPath, const char* const fragmentPath)
 {
-	int length;	
+	size_t length;	
 	char* shaderCode;
 
 	unsigned int vertex = glCreateShader(GL_VERTEX_SHADER);

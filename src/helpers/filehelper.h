@@ -4,7 +4,7 @@
 #include "../global.h"
 
 
-char* readFile(const char* path, int* length);
+char* readFile(const char* path, size_t* length);
 
 unsigned char* readBmp(const char* path, int* width, int* height, int* numChannels);
 

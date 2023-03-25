@@ -3,7 +3,7 @@
 
 uint32_t intFrom4Char(char* start);
 
-char* readFile(const char* path, int* length)
+char* readFile(const char* path, size_t* length)
 {
 	const size_t CHUNK_SIZE = 1024;
 
@@ -11,7 +11,7 @@ char* readFile(const char* path, int* length)
 
 	if (file == NULL)
 	{
-		*length = -1;
+		*length = 0;
 		return NULL;
 	}
 

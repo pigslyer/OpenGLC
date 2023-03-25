@@ -1,14 +1,17 @@
 import os
 import argparse
 import shutil
+import configparser
+
+conf = "build.ini"
 
 # global variables, move them to environment or something if you care
 src = "\\src"
 build = "\\.build"
 target = "main.exe"
 
-#compileFlags = "-Wconversion -Werror -std=c99 -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wall -Wno-missing-braces"
-compileFlags = ""
+compileFlags = "-Wconversion -Werror -std=c99 -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wall -Wno-missing-braces"
+#compileFlags = ""
 linkedLibs = "-lopengl32 -lglfw3 -lgdi32"
 
 ignoreCompilerFail = False

@@ -4,8 +4,8 @@ vboManager* initVboMan(int capacity, void (*initVAO)(void))
 {
 	vboManager* vbo = (vboManager*) malloc(sizeof(vboManager));
 	
-	vbo->vbos = (GLuint*) malloc(capacity * sizeof(GLuint));
-	vbo->vaos = (GLuint*) malloc(capacity * sizeof(GLuint));
+	vbo->vbos = (GLuint*) malloc((size_t)capacity * sizeof(GLuint));
+	vbo->vaos = (GLuint*) malloc((size_t)capacity * sizeof(GLuint));
 	vbo->unusedIndex = 0;
 	vbo->capacity = capacity;
 
@@ -39,7 +39,7 @@ void bindUnusedVbo(vboManager* vbo)
 {
 	if (!(vbo->unusedIndex < vbo->capacity))
 	{
-		printf("ran out of VBOs, current capacity: %lld\n", vbo->capacity);
+		printf("ran out of VBOs, current capacity: %d\n", vbo->capacity);
 		exit(1);
 	}
 
