@@ -1,7 +1,7 @@
-prefix=C:/Users/tibor/source/repos/RaycasterC
+prefix=E:/Game projects/C/OpenGLC
 exec_prefix=${prefix}
-includedir=C:/Users/tibor/source/repos/RaycasterC/include
-libdir=C:/Users/tibor/source/repos/RaycasterC/lib
+includedir=E:/Game projects/C/OpenGLC/include
+libdir=E:/Game projects/C/OpenGLC/lib
 
 Name: GLFW
 Description: A multi-platform library for OpenGL, window and input
