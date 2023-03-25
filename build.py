@@ -5,7 +5,6 @@ import configparser
 import glob
 
 confPath = ".\\build.ini"
-defineDelimeter = ","
 
 if (not os.path.isfile(confPath)):
 	print("cannot find build.ini file")
@@ -22,8 +21,9 @@ for define in config["build"]["defines"].split(","):
 	if len(define) > 0:
 		defines += f"-D{define} "
 
+rootdir = os.getcwd().replace("\\", "/")
 
-include = config["source"]["include"]
+include = os.path.join(rootdir, config["source"]["include"])
 src = config["source"]["sourceRoot"]
 build = config["build"]["buildFolder"]
 target = config["build"]["target"]
@@ -34,7 +34,6 @@ linkedLibs = config["build"]["linkedLibs"]
 
 ignoreCompilerFail = False
 
-rootdir = os.getcwd().replace("\\", "/")
 
 def makeDirIfNotExisting(path: str):
 	if (not os.path.isdir(path)):
