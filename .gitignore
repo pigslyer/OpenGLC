@@ -1,6 +1,4 @@
 main.exe
 .vscode/
 .build/
-include/
-lib/
 share/
