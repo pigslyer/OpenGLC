@@ -1,10 +1,12 @@
-#include <stdio.h>
 #include "filehelper.h"
+
 
 uint32_t intFrom4Char(char* start);
 
 char* readFile(const char* path, int* length)
 {
+	const size_t CHUNK_SIZE = 1024;
+
 	FILE* file = fopen(path, "r");
 
 	if (file == NULL)
@@ -13,27 +15,29 @@ char* readFile(const char* path, int* length)
 		return NULL;
 	}
 
-	// assuming SEEK_END is implemented, https://cplusplus.com/reference/cstdio/fseek/ says it doesn't have to be
-	fseek(file, 0, SEEK_END);
+	char* ret = (char*) malloc(0);
+	char chunk[CHUNK_SIZE];
+	size_t bufferPos = 0;
+	size_t bufferSize = 0;
+	size_t readChars;
 
-	int size = ftell(file);
-
-	if (length != NULL)
+	while ((readChars = fread(chunk, sizeof(char), CHUNK_SIZE, file)) > 0)
 	{
-		*length = size + 1;
-	}
-
-	fseek(file, 0, SEEK_SET);
-
-	char* ret = (char*) malloc((size_t) (size + 1) * sizeof(char));
-
-	for (int i = 0; i < size; i++)
-	{
-		ret[i] = (char) fgetc(file);
+		bufferSize += readChars;
+		ret = (char*) realloc(ret, bufferSize);
 		
+		for (size_t i = 0; i < readChars; i++)
+		{
+			ret[bufferPos + i] = chunk[i];
+		}
+
+		bufferPos = bufferSize;
 	}
 
-	ret[size] = '\0';
+	ret = realloc(ret, bufferSize + 1);
+	ret[bufferSize] = '\0';
+
+	*length = bufferSize + 1;
 
 	fclose(file);
 
