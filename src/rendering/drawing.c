@@ -3,6 +3,7 @@
 #include <rendering/vboManager.h>
 
 #include <helpers/filehelper.h>
+#include <paths/shaderPaths.h>
 
 enum Shaders
 {
@@ -26,8 +27,8 @@ void drawInit(void)
 
 	// shader loading
 
-	shaders[UniformModulatableBasicShader] = loadShader("shaders/basicUniformModulate.vert", "shaders/basicUniformModulate.frag");
-	shaders[AtlasShader] = loadShader("shaders/atlas.vert", "shaders/atlas.frag");
+	shaders[UniformModulatableBasicShader] = loadShader(BASIC2D_MODULATE_VERT, BASIC2D_MODULATE_FRAG);
+	shaders[AtlasShader] = loadShader(ATLAS_MODULATE_VERT, ATLAS_MODULATE_FRAG);
 
 	drawTextInit();
 }

@@ -4,8 +4,8 @@
 #include <rendering/shaders.h>
 
 #include <helpers/filehelper.h>
-
-const char* fontPath = "assets/font.bmp";
+#include <paths/shaderPaths.h>
+#include <paths/texturePaths.h>
 
 const int MAX_STRINGS = 8;
 const int CHARACTER_COUNT_HOR = 5;
@@ -26,7 +26,7 @@ void setupAtlasVbo(void);
 
 void drawTextInit(void)
 {
-	atlasShader = loadShader("shaders/atlas.vert", "shaders/atlas.frag");
+	atlasShader = loadShader(ATLAS_MODULATE_VERT, ATLAS_MODULATE_FRAG);
 
 	glUseProgram(atlasShader);
 	// this is a constant, might as well set it once
@@ -36,7 +36,7 @@ void drawTextInit(void)
 	stringVboManager = initVboMan(MAX_STRINGS, setupAtlasVbo);
 
 	int channelNum;
-	unsigned char* fontAtlasData = readBmp(fontPath, &fontAtlas.width, &fontAtlas.height, &channelNum);
+	unsigned char* fontAtlasData = readBmp(FONT, &fontAtlas.width, &fontAtlas.height, &channelNum);
 
 	glActiveTexture(GL_TEXTURE0 + (GLenum) fontActiveTexture);
 	
