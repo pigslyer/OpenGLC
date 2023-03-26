@@ -56,47 +56,16 @@ int main(void)
 
 	glfwSwapInterval(1);
 
-	//runInits();
-	
+	runInits();
+
     
-    float rainbowTriangle[] = 
-    {
-        -0.5f, -0.5f, +0.0f, +1.0f, +0.0f, +0.0f,
-        +0.5f, -0.5f, +0.0f, +0.0f, +1.0f, +0.0f,
-        +0.0f, +0.5f, +0.0f, +0.0f, +0.0f, +1.0f,
-    };
-    
-    unsigned int VAOs[3];
-    unsigned int VBOs[3];
 
-    glGenVertexArrays(3, VAOs);
-    glGenBuffers(3, VBOs);
-
-    // bounds 0s
-    glBindVertexArray(VAOs[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(rainbowTriangle), rainbowTriangle, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (0));
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)) );
-    glEnableVertexAttribArray(1);
-
-    // bounds 1s
-    glBindVertexArray(VAOs[1]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(rainbowTriangle), rainbowTriangle, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), NULL);
-    glEnableVertexAttribArray(0);
-    
 // wireframe
  //   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!glfwWindowShouldClose(window))
     {
+        runUpdates();
         runDraws();
 
         glfwPollEvents();
@@ -126,17 +95,16 @@ void runDraws(void)
     glClearColor(0.4f, 0.4f, 0.4f, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-
-	//levelDraw();
+	levelDraw();
 	//playerDraw();
 
     drawText("Hello world!", 12, 0, 0, 400, 100);
 
-    drawText("Hello world!", 12, 200, 110, 400, 100);
+    //drawText("Hello world!", 12, 200, 110, 400, 100);
 
-    drawTexthColored("Hello world!", 12, 400, 320, 100, COLOR4_1(0.0f, 0.0f, 1.0f, 0.6f));
+    //drawTexthColored("Hello world!", 12, 400, 320, 100, COLOR4_1(0.0f, 0.0f, 1.0f, 0.6f));
 
-    drawTextColored("Hello world!", 12, 0, 0, F(VIEWPORT_WIDTH), F(VIEWPORT_HEIGHT), COLOR4_1(1.0f, 0.6f, 0.6f, 0.8f));
+    //drawTextColored("Hello world!", 12, 0, 0, F(VIEWPORT_WIDTH), F(VIEWPORT_HEIGHT), COLOR4_1(1.0f, 0.6f, 0.6f, 0.8f));
 
     
 

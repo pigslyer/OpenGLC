@@ -62,10 +62,12 @@ rayData castRay(vec2f from, float angle)
 		dof = RENDER_RAYCAST_DOF_MAX;
 	}
 
+
 	while (dof < RENDER_RAYCAST_DOF_MAX)
 	{
 		vertMap.x = ((int)vertRes.x) >> POWER_OF_SIZE;
 		vertMap.y = ((int)vertRes.y) >> POWER_OF_SIZE;
+
 
 		mult = vertMap.x * vertMap.y;
 		if (mult >= 0 && mult < mapArea && map[vertMap.y * mapWidth + vertMap.x] != 0)
@@ -103,6 +105,7 @@ rayData castRay(vec2f from, float angle)
 		horzRes.x = from.x; horzRes.y = from.y;
 		dof = RENDER_RAYCAST_DOF_MAX;
 	}
+
 
 	while (dof < RENDER_RAYCAST_DOF_MAX)
 	{
@@ -190,7 +193,7 @@ void levelDraw()
 	float curDraw = F(VIEWPORT_WIDTH / 2) + DRAW_STEP * 0.5f;
 		
 	// +2 removes grey vertical scanline things
-	glLineWidth(DRAW_STEP + 2);
+	//glLineWidth(DRAW_STEP + 2);
 //	glBegin(GL_LINES);
 
 	float lineHeight, unmaxLineHeight, lineOff;
@@ -200,7 +203,7 @@ void levelDraw()
 	for (int i = 0; i < RENDER_RAYCAST_COUNT; i++)
 	{
 		collisionData = castRay(playerPosition, curAngle);
-
+	
 		if (collisionData.hasHit)
 		{
 			unmaxLineHeight = F(mapArea * VIEWPORT_HEIGHT) / (collisionData.rayLength * cosf(playerRotation - curAngle));
