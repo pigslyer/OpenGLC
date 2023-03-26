@@ -69,7 +69,7 @@ void drawTextClear(void)
 }
 
 
-void drawText(char* text, int length, vec2f pos, vec2f size)
+void drawTextColored(char* text, int length, vec2f pos, vec2f size, vec4f color)
 {
 	screenToVertex(&pos, &size);
 	//printf("pos x: %f, pos y: %f, size x: %f, size y: %f\n", pos.x, pos.y, size.x, size.y);
@@ -172,9 +172,9 @@ void drawText(char* text, int length, vec2f pos, vec2f size)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-inline void drawTexth(char* text, int length, vec2f pos, float height)
+inline vec2f _heightToSize(float height)
 {
-	drawText(text, length, pos, (vec2f){1.0f / WIDTH_TO_HEIGHT_RATIO * height, height});
+	return (vec2f) { 1.0f / WIDTH_TO_HEIGHT_RATIO * height, height};
 }
 
 void setupAtlasVbo(void)

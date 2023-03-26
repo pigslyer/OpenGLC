@@ -130,11 +130,15 @@ void runDraws(void)
 	//levelDraw();
 	//playerDraw();
 
-    drawText("Hello world!", 12, (vec2f){0.0f, 0.0f}, (vec2f){400.0f, 100.0f});
-    
-    drawText("Hello world!", 12, (vec2f){200.0f, 110.0f}, (vec2f){400.0f, 100.0f});
+    drawText("Hello world!", 12, 0, 0, 400, 100);
 
-    drawTexth("Hello world!", 12, (vec2f){200.0f, 220.0f}, 100.0f);
+    drawText("Hello world!", 12, 200, 110, 400, 100);
+
+    //drawText("Hello world!", 12, (vec2f){0.0f, 0.0f}, (vec2f){400.0f, 100.0f});
+    
+    //drawText("Hello world!", 12, (vec2f){200.0f, 110.0f}, (vec2f){400.0f, 100.0f});
+
+    //drawTexth("Hello world!", 12, (vec2f){200.0f, 220.0f}, 100.0f);
     
 
     glfwSwapBuffers(mainWindow);

@@ -30,6 +30,11 @@ struct vec2f
 	float x, y;
 } typedef vec2f;
 
+struct vec4f
+{
+	float x, y, z, a;
+} typedef vec4f;
+
 float wrapAnglef(float angle);
 
 bool isEqualApproxf(float what, float toWhat);
