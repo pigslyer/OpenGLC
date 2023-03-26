@@ -35,6 +35,10 @@ struct vec4f
 	float x, y, z, a;
 } typedef vec4f;
 
+#define COLOR3_1(r, g, b) ((vec4f){r, g, b, 1.0f})
+#define COLOR4_1(r, g, b, a) ((vec4f) {r, g, b, a})
+#define COLOR1_4(color) color.x, color.y, color.z, color.a
+
 float wrapAnglef(float angle);
 
 bool isEqualApproxf(float what, float toWhat);
