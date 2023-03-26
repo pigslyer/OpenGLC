@@ -60,8 +60,8 @@ void screenToVertex(vec2f* pos, vec2f* size)
 {
 	*pos = screenToVertexPos(*pos);
 	
-	size->x = size->x / F(SCREEN_WIDTH / 2);
-	size->y = -size->y / F(SCREEN_HEIGHT / 2);
+	size->x = size->x / F(VIEWPORT_WIDTH / 2);
+	size->y = -size->y / F(VIEWPORT_HEIGHT / 2);
 }
 
 void setupUniformModulateBasicVbo(void)
