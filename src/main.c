@@ -134,11 +134,10 @@ void runDraws(void)
 
     drawText("Hello world!", 12, 200, 110, 400, 100);
 
-    //drawText("Hello world!", 12, (vec2f){0.0f, 0.0f}, (vec2f){400.0f, 100.0f});
-    
-    //drawText("Hello world!", 12, (vec2f){200.0f, 110.0f}, (vec2f){400.0f, 100.0f});
+    drawTexthColored("Hello world!", 12, 400, 320, 100, COLOR4_1(0.0f, 0.0f, 1.0f, 0.6f));
 
-    //drawTexth("Hello world!", 12, (vec2f){200.0f, 220.0f}, 100.0f);
+    drawTextColored("Hello world!", 12, 0, 0, F(VIEWPORT_WIDTH), F(VIEWPORT_HEIGHT), COLOR4_1(1.0f, 0.6f, 0.6f, 0.8f));
+
     
 
     glfwSwapBuffers(mainWindow);

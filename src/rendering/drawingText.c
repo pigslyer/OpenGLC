@@ -18,6 +18,7 @@ const int fontActiveTexture = 15;
 texture fontAtlas;
 
 ObjID atlasShader;
+ShdLoc atlasModulationLocation;
 
 vboManager* stringVboManager;
 
@@ -30,7 +31,7 @@ void drawTextInit(void)
 	glUseProgram(atlasShader);
 	// this is a constant, might as well set it once
 	glUniform1i(glGetUniformLocation(atlasShader, "atlasTexture"), fontActiveTexture);
-
+	atlasModulationLocation = glGetUniformLocation(atlasShader, "modulation");
 
 	stringVboManager = initVboMan(MAX_STRINGS, setupAtlasVbo);
 
@@ -69,7 +70,7 @@ void drawTextClear(void)
 }
 
 
-void drawTextColored(char* text, int length, vec2f pos, vec2f size, vec4f color)
+void drawTextColoredv(char* text, int length, vec2f pos, vec2f size, vec4f color)
 {
 	screenToVertex(&pos, &size);
 	//printf("pos x: %f, pos y: %f, size x: %f, size y: %f\n", pos.x, pos.y, size.x, size.y);
@@ -81,6 +82,7 @@ void drawTextColored(char* text, int length, vec2f pos, vec2f size, vec4f color)
 	vec2f sizePerChar = (vec2f) {size.x / F(length + 1), size.y};
 	vec2f sizePerTile = (vec2f) {1.0f / F(CHARACTER_COUNT_HOR), 1.0f / F(CHARACTER_COUNT_VERT)};
 
+	// be nice if i were to use a chunked buffer here instead of needing to know the total size all the time
 	float* vertexData = (float*) malloc(((size_t)length) * INDEX_PER_CHAR * sizeof(float));
 
 	char temp;
@@ -163,6 +165,8 @@ void drawTextColored(char* text, int length, vec2f pos, vec2f size, vec4f color)
 
 	glUseProgram(atlasShader);
 
+	glUniform4f(atlasModulationLocation, COLOR1_4(color));
+
 	// 2 triangles per character, 3 vertices per triangle point
 	glDrawArrays(GL_TRIANGLES, 0, visibleCharacterCount * 2 * 3);
 
@@ -172,9 +176,9 @@ void drawTextColored(char* text, int length, vec2f pos, vec2f size, vec4f color)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-inline vec2f _heightToSize(float height)
+inline float _heightToWidth(float height)
 {
-	return (vec2f) { 1.0f / WIDTH_TO_HEIGHT_RATIO * height, height};
+	return 1.0f / WIDTH_TO_HEIGHT_RATIO * height;
 }
 
 void setupAtlasVbo(void)
