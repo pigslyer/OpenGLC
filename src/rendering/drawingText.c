@@ -5,6 +5,8 @@
 
 #include <helpers/filehelper.h>
 
+const char* fontPath = "assets/font.bmp";
+
 const int MAX_STRINGS = 8;
 const int CHARACTER_COUNT_HOR = 5;
 const int CHARACTER_COUNT_VERT = 6;
@@ -33,7 +35,7 @@ void drawTextInit(void)
 	stringVboManager = initVboMan(MAX_STRINGS, setupAtlasVbo);
 
 	int channelNum;
-	unsigned char* fontAtlasData = readBmp("assets/fontExtended.bmp", &fontAtlas.width, &fontAtlas.height, &channelNum);
+	unsigned char* fontAtlasData = readBmp(fontPath, &fontAtlas.width, &fontAtlas.height, &channelNum);
 
 	glActiveTexture(GL_TEXTURE0 + (GLenum) fontActiveTexture);
 	
