@@ -3,6 +3,8 @@
 
 #include <global.h>
 
+typedef GLint ShdLoc;
+
 unsigned int loadShader(const char* const vertex, const char* const fragment);
 
 #endif
