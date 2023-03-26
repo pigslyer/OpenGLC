@@ -1,6 +1,8 @@
 #include <level.h>
 #include <player.h>
 
+#include <rendering/drawing.h>
+
 #define POWER_OF_SIZE 6
 #define CELL_SIZE (1 << POWER_OF_SIZE)
 #define CELL_SIZEF ((float)(CELL_SIZE))
@@ -146,38 +148,38 @@ void levelUpdate(void)
 
 void levelDraw()
 {
-	/*
-	// overhead view
-	glLineWidth(8);
-	glBegin(GL_QUADS);
-
-	vec2i tl;
-
-	for (int x = 0; x < mapWidth; x++)
-	{
-		tl.x = x * CELL_SIZE;
-
-		for (int y = 0; y < mapHeight; y++)
-		{
-			tl.y = y * CELL_SIZE;
-
-			if (map[y * mapWidth + x])
-			{
-				glColor3f(0, 0, 0);
-			}
-			else
-			{
-				glColor3f(1, 1, 1);
-			}
-
-			glVertex2i(tl.x + 1, tl.y + 1);
-			glVertex2i(tl.x + CELL_SIZE - 1, tl.y + 1);
-			glVertex2i(tl.x + CELL_SIZE - 1, tl.y + CELL_SIZE - 1);
-			glVertex2i(tl.x + 1, tl.y + CELL_SIZE - 1);
-		}
-	}
-
-	glEnd();
+	
+//	// overhead view
+//	glLineWidth(8);
+//	glBegin(GL_QUADS);
+//
+//	vec2i tl;
+//
+//	for (int x = 0; x < mapWidth; x++)
+//	{
+//		tl.x = x * CELL_SIZE;
+//
+//		for (int y = 0; y < mapHeight; y++)
+//		{
+//			tl.y = y * CELL_SIZE;
+//
+//			if (map[y * mapWidth + x])
+//			{
+//				glColor3f(0, 0, 0);
+//			}
+//			else
+//			{
+//				glColor3f(1, 1, 1);
+//			}
+//
+//			glVertex2i(tl.x + 1, tl.y + 1);
+//			glVertex2i(tl.x + CELL_SIZE - 1, tl.y + 1);
+//			glVertex2i(tl.x + CELL_SIZE - 1, tl.y + CELL_SIZE - 1);
+//			glVertex2i(tl.x + 1, tl.y + CELL_SIZE - 1);
+//		}
+//	}
+//
+//	glEnd();
 
 	// "3d" view
 
@@ -189,12 +191,12 @@ void levelDraw()
 		
 	// +2 removes grey vertical scanline things
 	glLineWidth(DRAW_STEP + 2);
-	glBegin(GL_LINES);
+//	glBegin(GL_LINES);
 
 	float lineHeight, unmaxLineHeight, lineOff;
 	rayData collisionData;
 
-	float breathingAnim = sinf(F(glfwGetTime()) * 1.2f) * 10.0f;
+	float breathingAnim = 0;//sinf(F(glfwGetTime()) * 1.2f) * 10.0f;
 	for (int i = 0; i < RENDER_RAYCAST_COUNT; i++)
 	{
 		collisionData = castRay(playerPosition, curAngle);
@@ -205,29 +207,35 @@ void levelDraw()
 			lineHeight = MIN(unmaxLineHeight, F(VIEWPORT_HEIGHT));
 			lineOff = 160 - (lineHeight * 0.5f);
 
-			// ceiling
-			glColor3f(0.4f, 0.4f, 0.4f);
 
-			glVertex2f(curDraw, 0);
-			glVertex2f(curDraw, lineOff + breathingAnim);
+			drawLineColored(curDraw, 0, curDraw, lineOff + breathingAnim, COLOR3_1(0.4f, 0.4f, 0.4f));
+			drawLineColored(curDraw, lineOff + breathingAnim, curDraw, lineHeight + lineOff + breathingAnim, COLOR3_1(0.0f, 0.0f, 0.7f));
+			drawLineColored(curDraw, lineHeight + lineOff + breathingAnim, curDraw, F(VIEWPORT_HEIGHT), COLOR3_1(1.0f, 1.0f, 1.0f));
 
-			// wall
-			glColor3f(0, 0, 0.7f);
 
-			glVertex2f(curDraw, lineOff + breathingAnim);
-			glVertex2f(curDraw, lineHeight + lineOff + breathingAnim);
-
-			// floor
-			glColor3f(1, 1, 1);
-
-			glVertex2f(curDraw, lineHeight + lineOff + breathingAnim);
-			glVertex2f(curDraw, F(VIEWPORT_HEIGHT));
+//			// ceiling
+//			glColor3f(0.4f, 0.4f, 0.4f);
+//
+//			glVertex2f(curDraw, 0);
+//			glVertex2f(curDraw, lineOff + breathingAnim);
+//
+//			// wall
+//			glColor3f(0, 0, 0.7f);
+//
+//			glVertex2f(curDraw, lineOff + breathingAnim);
+//			glVertex2f(curDraw, lineHeight + lineOff + breathingAnim);
+//
+//			// floor
+//			glColor3f(1, 1, 1);
+//
+//			glVertex2f(curDraw, lineHeight + lineOff + breathingAnim);
+//			glVertex2f(curDraw, F(VIEWPORT_HEIGHT));
 		}
 
 		curDraw += DRAW_STEP;
 		curAngle -= ANGLE_STEP;
 	}
 
-	glEnd();
-	*/
+//	glEnd();
+	
 }

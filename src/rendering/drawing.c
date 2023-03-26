@@ -31,11 +31,13 @@ void drawInit(void)
 	shaders[AtlasShader] = loadShader(ATLAS_MODULATE_VERT, ATLAS_MODULATE_FRAG);
 
 	drawTextInit();
+	drawPrimitivesInit();
 }
 
 void drawTerminate(void)
 {
 	drawTextTerminate();
+	drawPrimitivesTerminate();
 
 	for (int i = 0; i < ShaderCount; i++)
 	{
@@ -46,6 +48,7 @@ void drawTerminate(void)
 void drawClear(void)
 {
 	drawTextClear();
+	drawPrimitivesClear();
 }
 
 

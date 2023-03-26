@@ -4,6 +4,7 @@
 #include <global.h>
 
 #include <rendering/drawingText.h>
+#include <rendering/drawingPrimitives.h>
 
 typedef unsigned int ObjID;
 
