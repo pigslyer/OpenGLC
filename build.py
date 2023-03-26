@@ -98,7 +98,7 @@ def compileToObject(sourceFile: str, compileFlags: str):
 
 	fixedFlags = compileFlags.replace("${defaultCompilationFlags}", defaultCompilerFlags)
 	fixedSrc = src.removeprefix(".")
-	command = f"{compiler} -I{include} {defines} -c \"{rootdir}{fixedSrc}{sourceFile}.c\" {fixedFlags}"
+	command = f"{compiler} -I\"{include}\" {defines} -c \"{rootdir}{fixedSrc}{sourceFile}.c\" {fixedFlags}"
 
 	returnCode = os.system(command)
 
