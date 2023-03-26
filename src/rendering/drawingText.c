@@ -122,13 +122,11 @@ void drawTextColoredv(char* text, int length, vec2f pos, vec2f size, vec4f color
 		vertexData[offset + 0] = curPos.x; vertexData[offset + 1] = curPos.y;
 		// top left UV
 		vertexData[offset + 2] = curUV.x; vertexData[offset + 3] = curUV.y + sizePerTile.y;
-		//vertexData[offset + 2] = 1.0f; vertexData[offset + 3] = 1.0f;
 		
 		// bottom left position
 		vertexData[offset + 4] = curPos.x; vertexData[offset + 5] = curPos.y + sizePerChar.y;
 		// bottom left UV
 		vertexData[offset + 6] = curUV.x; vertexData[offset + 7] = curUV.y;
-		//vertexData[offset + 6] = 0.0f; vertexData[offset + 7] = 0.0f;
 		
 		// bottom right position
 		vertexData[offset + 8] = curPos.x + sizePerChar.x; vertexData[offset + 9] = curPos.y + sizePerChar.y;
@@ -183,8 +181,6 @@ inline float _heightToWidth(float height)
 
 void setupAtlasVbo(void)
 {
-	glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), NULL, GL_DYNAMIC_DRAW);
-	
 	// vertex position
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));
 	glEnableVertexAttribArray(0);
