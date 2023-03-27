@@ -23,4 +23,6 @@ void drawClear(void);
 vec2f screenToVertexPos(vec2f screenPos);
 void screenToVertex(vec2f* pos, vec2f* size);
 
+vec2f screenSizeToNorm(vec2f length);
+
 #endif

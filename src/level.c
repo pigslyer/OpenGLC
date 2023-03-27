@@ -187,10 +187,10 @@ void levelDraw()
 	// "3d" view
 
 	const float ANGLE_STEP = PLAYER_FOV / F(RENDER_RAYCAST_COUNT);
-	const float DRAW_STEP = F(VIEWPORT_WIDTH / 2) / F(RENDER_RAYCAST_COUNT);
+	const float DRAW_STEP = F(VIEWPORT_WIDTH) / F(RENDER_RAYCAST_COUNT); //F(VIEWPORT_WIDTH / 2) / F(RENDER_RAYCAST_COUNT);
 
 	float curAngle = playerRotation + PLAYER_FOV * 0.5f;
-	float curDraw = F(VIEWPORT_WIDTH / 2) + DRAW_STEP * 0.5f;
+	float curDraw = DRAW_STEP * 0.5f;//F(VIEWPORT_WIDTH / 2) + DRAW_STEP * 0.5f;
 		
 	// +2 removes grey vertical scanline things
 	//glLineWidth(DRAW_STEP + 2);
@@ -211,9 +211,9 @@ void levelDraw()
 			lineOff = 160 - (lineHeight * 0.5f);
 
 
-			drawLineColored(curDraw, 0, curDraw, lineOff + breathingAnim, COLOR3_1(0.4f, 0.4f, 0.4f));
-			drawLineColored(curDraw, lineOff + breathingAnim, curDraw, lineHeight + lineOff + breathingAnim, COLOR3_1(0.0f, 0.0f, 0.7f));
-			drawLineColored(curDraw, lineHeight + lineOff + breathingAnim, curDraw, F(VIEWPORT_HEIGHT), COLOR3_1(1.0f, 1.0f, 1.0f));
+			drawLineColored(curDraw, 0, curDraw, lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.4f, 0.4f, 0.4f));
+			drawLineColored(curDraw, lineOff + breathingAnim, curDraw, lineHeight + lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.0f, 0.0f, 0.7f));
+			drawLineColored(curDraw, lineHeight + lineOff + breathingAnim, curDraw, F(VIEWPORT_HEIGHT), DRAW_STEP, COLOR3_1(1.0f, 1.0f, 1.0f));
 
 
 //			// ceiling

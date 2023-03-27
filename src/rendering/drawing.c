@@ -68,6 +68,11 @@ void screenToVertex(vec2f* pos, vec2f* size)
 	size->y = -size->y / F(VIEWPORT_HEIGHT / 2);
 }
 
+vec2f screenSizeToNorm(vec2f org)
+{
+	return (vec2f){org.x / F(VIEWPORT_WIDTH / 2), -org.y / F(VIEWPORT_HEIGHT / 2)};
+}
+
 void setupUniformModulateBasicVbo(void)
 {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0));

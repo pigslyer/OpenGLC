@@ -37,27 +37,50 @@ void drawPrimitivesClear(void)
 	clearVbos(primitivesVbo);
 }
 
-void drawLineColoredv(vec2f from, vec2f to, vec4f color)
+// glLineWidth doesn't make lines wide enough for my needs, so we're faking it with quads
+void drawLineColoredv(vec2f from, vec2f to, float width, vec4f color)
 {
 	from = screenToVertexPos(from);
 	to = screenToVertexPos(to);
+	width = screenSizeToNorm((vec2f){width, 0.0f}).x * 0.5f;
 
 	float vertexData[] = 
 	{
-		from.x, 
+		// first triangle
+		// top left
+		from.x - width, 
 		from.y, 
-		to.x, 
+
+		// bottom left
+		to.x - width, 
+		to.y,
+
+		// bottom right
+		to.x + width,
+		to.y,
+
+		// second triangle
+		// top left
+		from.x - width, 
+		from.y, 
+
+		// top right
+		to.x + width, 
+		from.y,
+
+		// bottom right
+		to.x + width,
 		to.y,
 	};
 
 	bindUnusedVbo(primitivesVbo);
 
-	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(float), vertexData, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_DYNAMIC_DRAW);
 
 	glUseProgram(primitiveShader);
 	glUniform4f(modulateLocation, COLOR1_4(color));
 
-	glDrawArrays(GL_LINES, 0, 2);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void setupPrimitiveVbo(void)

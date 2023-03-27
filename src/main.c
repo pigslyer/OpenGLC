@@ -22,6 +22,7 @@ GLFWwindow* mainWindow = NULL;
 
 int main(void)
 {
+
     if (!glfwInit())
 	{
 		return -1;
