@@ -199,15 +199,11 @@ void levelDraw()
 
 	float curAngle = playerRotation + PLAYER_FOV * 0.5f;
 	float curDraw = DRAW_STEP * 0.5f;//F(VIEWPORT_WIDTH / 2) + DRAW_STEP * 0.5f;
-		
-	// +2 removes grey vertical scanline things
-	//glLineWidth(DRAW_STEP + 2);
-//	glBegin(GL_LINES);
-
+	
 	float lineHeight, unmaxLineHeight, lineOff;
 	rayData collisionData;
 
-	float breathingAnim = 0;//sinf(F(glfwGetTime()) * 1.2f) * 10.0f;
+	float breathingAnim = sinf(F(glfwGetTime()) * 1.2f) * 10.0f + 10.0f;
 	for (int i = 0; i < RENDER_RAYCAST_COUNT; i++)
 	{
 		collisionData = castRay(playerPosition, curAngle);
@@ -217,37 +213,15 @@ void levelDraw()
 			unmaxLineHeight = F(50 * VIEWPORT_HEIGHT) / (collisionData.rayLength * cosf(playerRotation - curAngle));
 			lineHeight = MIN(unmaxLineHeight, F(VIEWPORT_HEIGHT));
 			lineOff = F(VIEWPORT_HEIGHT / 2) - lineHeight * 0.5f;
-			//lineOff = 160 - (lineHeight * 0.5f);
 
 
 			drawLineColored(curDraw, 0, curDraw, lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.4f, 0.4f, 0.4f));
 			drawLineColored(curDraw, lineOff + breathingAnim, curDraw, lineHeight + lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.0f, 0.0f, 0.7f));
 			drawLineColored(curDraw, lineHeight + lineOff + breathingAnim, curDraw, F(VIEWPORT_HEIGHT), DRAW_STEP, COLOR3_1(1.0f, 1.0f, 1.0f));
-
-
-//			// ceiling
-//			glColor3f(0.4f, 0.4f, 0.4f);
-//
-//			glVertex2f(curDraw, 0);
-//			glVertex2f(curDraw, lineOff + breathingAnim);
-//
-//			// wall
-//			glColor3f(0, 0, 0.7f);
-//
-//			glVertex2f(curDraw, lineOff + breathingAnim);
-//			glVertex2f(curDraw, lineHeight + lineOff + breathingAnim);
-//
-//			// floor
-//			glColor3f(1, 1, 1);
-//
-//			glVertex2f(curDraw, lineHeight + lineOff + breathingAnim);
-//			glVertex2f(curDraw, F(VIEWPORT_HEIGHT));
 		}
 
 		curDraw += DRAW_STEP;
 		curAngle -= ANGLE_STEP;
 	}
-
-//	glEnd();
 	
 }
