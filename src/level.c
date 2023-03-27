@@ -144,9 +144,17 @@ void levelInit(void)
 	mapArea = 64;
 }
 
+float magic = 0.0f;
+
 void levelUpdate(void)
 {
+	float diff = F(GET_KEY(GLFW_KEY_T) - GET_KEY(GLFW_KEY_G));
+	magic += diff;
 
+	if (GET_KEY(GLFW_KEY_SPACE))
+	{
+		printf("magic number: %f\n", magic);
+	}
 }
 
 void levelDraw()
@@ -206,9 +214,10 @@ void levelDraw()
 	
 		if (collisionData.hasHit)
 		{
-			unmaxLineHeight = F(mapArea * VIEWPORT_HEIGHT) / (collisionData.rayLength * cosf(playerRotation - curAngle));
+			unmaxLineHeight = F(50 * VIEWPORT_HEIGHT) / (collisionData.rayLength * cosf(playerRotation - curAngle));
 			lineHeight = MIN(unmaxLineHeight, F(VIEWPORT_HEIGHT));
-			lineOff = 160 - (lineHeight * 0.5f);
+			lineOff = F(VIEWPORT_HEIGHT / 2) - lineHeight * 0.5f;
+			//lineOff = 160 - (lineHeight * 0.5f);
 
 
 			drawLineColored(curDraw, 0, curDraw, lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.4f, 0.4f, 0.4f));
