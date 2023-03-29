@@ -8,19 +8,18 @@
 
 #define CEIL_COLOR COLOR3_1(0.4f, 0.4f, 0.6f)
 #define FLOOR_COLOR COLOR3_1(1.0f, 1.0f, 1.0f)
+#define DEFAULT_WALL_COLOR COLOR3_1(0.0f, 0.0f, 0.7f)
 
 enum VAOS
 {
 	CEILING, WALL, FLOOR
 };
 
-// CEIL_FLOOR = ceiling to floor, since we need both for the wall VAO
 enum VBOS
 {
-	CEIL_HEIGHT, FLOOR_HEIGHT, CEIL_FLOOR_HEIGHT, X
+	CEIL_HEIGHT, FLOOR_HEIGHT, X
 };
 
-// 0 is ceiling, 1 will be walls, 2 is floor
 static ObjID vao[3];
 
 static size_t posInBuffer;
@@ -29,21 +28,30 @@ static float* buffers[3];
 static ObjID vbo[4];
 
 static ObjID ceilOrFloorShader;
-static ShdLoc modulate, xoffset, ybase;
+static ShdLoc cfModulate, cfXoffset, cfYbase;
+
+static ObjID wallShader;
+static ShdLoc wModulate, wOffset;
 
 void levelDrawInit(void)
 {
 
 	// generating opengl buffers
 	glGenVertexArrays(3, vao);
-	glGenBuffers(4, vbo);
+	glGenBuffers(3, vbo);
 
-	// generating shader
+	// generating ceiling and floor shader
 	ceilOrFloorShader = loadShader(LINE_FROM_XY_VERT, FRAG_EQUALS_MODULATE_UNIFORM_FRAG);
 
-	modulate = glGetUniformLocation(ceilOrFloorShader, "modulate");
-	xoffset = glGetUniformLocation(ceilOrFloorShader, "xoffset");
-	ybase = glGetUniformLocation(ceilOrFloorShader, "ybase");
+	cfModulate = glGetUniformLocation(ceilOrFloorShader, "modulate");
+	cfXoffset = glGetUniformLocation(ceilOrFloorShader, "xoffset");
+	cfYbase = glGetUniformLocation(ceilOrFloorShader, "ybase");
+
+	// generating wall shader
+	wallShader = loadShader(LINE_FROM_XY_VERTEX_VERT, FRAG_EQUALS_MODULATE_UNIFORM_FRAG);
+
+	wModulate = glGetUniformLocation(wallShader, "modulate");
+	wOffset = glGetUniformLocation(wallShader, "xoffset");
 
 	// calculating xoffsets and xbases
 
@@ -60,7 +68,10 @@ void levelDrawInit(void)
 
 	// we can just set the xoffset now, seeing as it is static
 	glUseProgram(ceilOrFloorShader);
-	glUniform1f(xoffset, step);
+	glUniform1f(cfXoffset, step);
+
+	glUseProgram(wallShader);
+	glUniform1f(wOffset, step);
 
 	// save the xs to a buffer
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[X]);
@@ -95,11 +106,32 @@ void levelDrawInit(void)
 	glEnableVertexAttribArray(1);
 	glVertexAttribDivisor(1, 4);
 
+	// binding and setting up wall vao
+	glBindVertexArray(vao[WALL]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[FLOOR_HEIGHT]);
+
+	glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), (void*)(0));
+	glEnableVertexAttribArray(0);
+	glVertexAttribDivisor(0, 4);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[CEIL_HEIGHT]);
+	
+	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), (void*)(0));
+	glEnableVertexAttribArray(1);
+	glVertexAttribDivisor(1, 4);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[X]);
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), (void*)(0));
+	glEnableVertexAttribArray(2);
+	glVertexAttribDivisor(2, 4);
+
+
 	// generating the buffers
 	// we definitely don't need more than the raycast count lines, ever
 	buffers[CEIL_HEIGHT] = (float*)malloc((size_t)RENDER_RAYCAST_COUNT * sizeof(float));
 	buffers[FLOOR_HEIGHT] = (float*)malloc((size_t)RENDER_RAYCAST_COUNT * sizeof(float));
-
+	
 	ERROR("no errors?");
 }
 
@@ -114,7 +146,9 @@ void levelDrawTerminate(void)
 {
 	glDeleteVertexArrays(3, vao);
 	glDeleteBuffers(4, vbo);
+	
 	glDeleteProgram(ceilOrFloorShader);
+	glDeleteProgram(wallShader);
 
 	free(buffers[CEIL_HEIGHT]);
 	free(buffers[FLOOR_HEIGHT]);
@@ -168,6 +202,7 @@ void levelDraw(void)
 
 	float breathingAnim = sinf(F(glfwGetTime()) * 1.2f) * 10.0f + 10.0f;
 	
+	float ceilPos, floorPos;
 	for (int i = 0; i < RENDER_RAYCAST_COUNT; i++)
 	{
 		collisionData = castRay(playerPosition, curAngle);
@@ -178,21 +213,19 @@ void levelDraw(void)
 			lineHeight = MIN(unmaxLineHeight, F(VIEWPORT_HEIGHT));
 			lineOff = F(VIEWPORT_HEIGHT / 2) - lineHeight * 0.5f;
 
-			// we have to offset this from the ceiling
-			buffers[CEIL_HEIGHT][posInBuffer] = -1.0f - LIN_MAP(lineOff + breathingAnim, 0.0f, F(VIEWPORT_HEIGHT), -1.0f, 1.0f);
-			
-			buffers[FLOOR_HEIGHT][posInBuffer] = 1.0f - LIN_MAP(lineHeight + lineOff + breathingAnim, 0.0f, F(VIEWPORT_HEIGHT), -1.0f, 1.0f);
+			ceilPos = LIN_MAP(lineOff + breathingAnim, 0.0f, F(VIEWPORT_HEIGHT), -1.0f, 1.0f);
+			floorPos = LIN_MAP(lineHeight + lineOff + breathingAnim, 0.0f, F(VIEWPORT_HEIGHT), -1.0f, 1.0f);
+
+			buffers[CEIL_HEIGHT][posInBuffer] = ceilPos;
+			buffers[FLOOR_HEIGHT][posInBuffer] = floorPos;
 
 			posInBuffer++;
-
-			// using primitives until i set up instancing for texture lines
-			drawLineColored(curDraw, lineOff + breathingAnim, curDraw, lineHeight + lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.0f, 0.0f, 0.7f));
 		}
 		else
 		{
 			buffers[CEIL_HEIGHT][posInBuffer] = -1.0f;
 			buffers[FLOOR_HEIGHT][posInBuffer] = 1.0f;
-
+			
 			posInBuffer++;
 		}
 
@@ -206,19 +239,27 @@ void levelDraw(void)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[FLOOR_HEIGHT]);
 	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(posInBuffer * sizeof(float)), buffers[FLOOR_HEIGHT], GL_DYNAMIC_DRAW);
 
+	// ceil or floor
 	glUseProgram(ceilOrFloorShader);
 
 	// ceiling
 	glBindVertexArray(vao[CEILING]);
-	glUniform1f(ybase, 1.0f);
-	glUniform4f(modulate, COLOR1_4(CEIL_COLOR));
+	glUniform1f(cfYbase, 1.0f);
+	glUniform4f(cfModulate, COLOR1_4(CEIL_COLOR));
 
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 4 * (GLsizei) posInBuffer);
 
 	// floor
 	glBindVertexArray(vao[FLOOR]);
-	glUniform1f(ybase, -1.0f);
-	glUniform4f(modulate, COLOR1_4(FLOOR_COLOR));
+	glUniform1f(cfYbase, -1.0f);
+	glUniform4f(cfModulate, COLOR1_4(FLOOR_COLOR));
+
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 4 * (GLsizei)posInBuffer);
+
+	// wall
+	glUseProgram(wallShader);
+	glUniform4f(wModulate, COLOR1_4(DEFAULT_WALL_COLOR));
+	glBindVertexArray(vao[WALL]);
 
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 4 * (GLsizei)posInBuffer);
 

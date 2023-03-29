@@ -8,5 +8,6 @@ uniform float ybase;
 
 void main()
 {
-	gl_Position = vec4(xbase + xoffset * (gl_VertexID & 1), ybase + yoffset * ((gl_VertexID & 2) >> 1), 1.0f, 1.0f);
+	float usingy = gl_VertexID < 2 ? ybase : yoffset;
+	gl_Position = vec4(xbase + xoffset * (gl_VertexID & 1), usingy, 1.0f, 1.0f);
 }
