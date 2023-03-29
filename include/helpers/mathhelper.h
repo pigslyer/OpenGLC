@@ -35,6 +35,8 @@ struct vec4f
 	float x, y, z, a;
 } typedef vec4f;
 
+#define VEC2F2_1(x, y) ((vec2f){x, y})
+
 #define COLOR3_1(r, g, b) ((vec4f){r, g, b, 1.0f})
 #define COLOR4_1(r, g, b, a) ((vec4f) {r, g, b, a})
 #define COLOR1_4(color) color.x, color.y, color.z, color.a
