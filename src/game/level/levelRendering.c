@@ -39,7 +39,7 @@ void levelDrawInit(void)
 	glGenBuffers(4, vbo);
 
 	// generating shader
-	ceilOrFloorShader = loadShader(LINE_FROM_XY_VERT, LINE_FROM_XY_FRAG);
+	ceilOrFloorShader = loadShader(LINE_FROM_XY_VERT, FRAG_EQUALS_MODULATE_UNIFORM_FRAG);
 
 	modulate = glGetUniformLocation(ceilOrFloorShader, "modulate");
 	xoffset = glGetUniformLocation(ceilOrFloorShader, "xoffset");
