@@ -11,7 +11,7 @@ extern const char* const BASIC2D_MODULATE_VERT;
 extern const char* const BASIC2D_MODULATE_FRAG;
 
 extern const char* const LINE_FROM_XY_VERT;
-
+extern const char* const LINE_FROM_XY_VERTEX_VERT;
 
 
 #endif
