@@ -185,16 +185,15 @@ void levelDraw(void)
 
 			posInBuffer++;
 
-			//positionInBuffer += fillInLine(tempBuffer + positionInBuffer, VEC2F2_1(curDraw, 0), VEC2F2_1(curDraw, lineOff + breathingAnim), DRAW_STEP);
-
 			// using primitives until i set up instancing for texture lines
 			drawLineColored(curDraw, lineOff + breathingAnim, curDraw, lineHeight + lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.0f, 0.0f, 0.7f));
+		}
+		else
+		{
+			buffers[CEIL_HEIGHT][posInBuffer] = -1.0f;
+			buffers[FLOOR_HEIGHT][posInBuffer] = 1.0f;
 
-			//positionInBuffer += fillInLine(tempBuffer + positionInBuffer, VEC2F2_1(curDraw, lineHeight + lineOff + breathingAnim), VEC2F2_1(curDraw, F(VIEWPORT_HEIGHT)), DRAW_STEP);
-
-			//drawLineColored(curDraw, 0, curDraw, lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.4f, 0.4f, 0.4f));
-			//drawLineColored(curDraw, lineOff + breathingAnim, curDraw, lineHeight + lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.0f, 0.0f, 0.7f));
-			//drawLineColored(curDraw, lineHeight + lineOff + breathingAnim, curDraw, F(VIEWPORT_HEIGHT), DRAW_STEP, COLOR3_1(1.0f, 1.0f, 1.0f));
+			posInBuffer++;
 		}
 
 		curDraw += DRAW_STEP;
