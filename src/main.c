@@ -75,8 +75,6 @@ int mainActual(void)
 	glfwSwapInterval(1);
 
 	runInits();
-
-    levelDraw();
 	
 
 // wireframe
@@ -117,7 +115,7 @@ void runDraws(void)
 
     drawText("Hello world!", 12, 0, 0, 400, 100);
 
-    drawText("Rats?", 5, 0, 200, 400, 100);
+    //drawText("Rats?", 5, 0, 200, 400, 100);
 
     //drawText("Hello world!", 12, 200, 110, 400, 100);
 

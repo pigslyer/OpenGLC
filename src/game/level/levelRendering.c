@@ -6,77 +6,119 @@
 
 #include <paths/shaderPaths.h>
 
-#define MAX_LINES 500
-
-#define CEIL_COLOR COLOR3_1(0.1f,1,1)
+#define CEIL_COLOR COLOR3_1(1.0f, 0.0f, 0.0f)
 #define FLOOR_COLOR COLOR3_1(0.3f, 0.4f, 0.112668625789f)
 
-size_t positionInBuffer;
-float* tempBuffer;
+enum VAOS
+{
+	CEILING, WALL, FLOOR
+};
 
-ObjID VAO;
-ObjID VBO_instance, VBO_shared;
-ObjID lineShader;
+// CEIL_FLOOR = ceiling to floor, since we need both for the wall VAO
+enum VBOS
+{
+	CEIL_HEIGHT, FLOOR_HEIGHT, CEIL_FLOOR_HEIGHT, X
+};
 
-#define test(a) printf("got here %d\n", a);
+// 0 is ceiling, 1 will be walls, 2 is floor
+static ObjID vao[3];
+
+static size_t posInBuffer;
+static float* buffers[3];
+
+static ObjID vbo[4];
+
+static ObjID ceilOrFloorShader;
+static ShdLoc modulate, xoffset, ybase;
 
 void levelDrawInit(void)
 {
-	glGenVertexArrays(1, &VAO);
 
-	glGenBuffers(1, &VBO_instance);
+	// generating opengl buffers
+	glGenVertexArrays(3, vao);
+	glGenBuffers(4, vbo);
 
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_instance);
+	// generating shader
+	ceilOrFloorShader = loadShader(LINE_FROM_XY_VERT, LINE_FROM_XY_FRAG);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 100, NULL, GL_DYNAMIC_DRAW);
+	modulate = glGetUniformLocation(ceilOrFloorShader, "modulate");
+	xoffset = glGetUniformLocation(ceilOrFloorShader, "xoffset");
+	ybase = glGetUniformLocation(ceilOrFloorShader, "ybase");
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(0));
-	glEnableVertexAttribArray(0);
-//	glVertexAttribDivisor(0, 1);
+	// calculating xoffsets and xbases
 
-	// shader loading
-	lineShader = loadShader(LINE_MODULATE_INSTANCE_VERT, LINE_MODULATE_INSTANCE_FRAG);
+	float* xs = (float*) malloc((size_t)RENDER_RAYCAST_COUNT * sizeof(float));
 
-	glUseProgram(lineShader);
+	const float step = 2.0f / F(RENDER_RAYCAST_COUNT);
 
-	float colors[] = 
+	float curX = -1.0f;
+	for (int i = 0; i < RENDER_RAYCAST_COUNT; i++, curX += step)
 	{
-		COLOR1_4(CEIL_COLOR),
-		COLOR1_4(FLOOR_COLOR),
-	};
+		xs[i] = curX;
+	}
 
-	glGenBuffers(1, &VBO_shared);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_shared);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
-	
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));
+	// we can just set the xoffset now, seeing as it is static
+	glUseProgram(ceilOrFloorShader);
+	glUniform1f(xoffset, step);
+
+	// save the xs to a buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[X]);
+	glBufferData(GL_ARRAY_BUFFER, (size_t)(RENDER_RAYCAST_COUNT) * sizeof(float), xs, GL_STATIC_DRAW);
+
+	free(xs);
+
+
+	// binding and setting up ceiling vao
+	glBindVertexArray(vao[CEILING]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[CEIL_HEIGHT]);
+	glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), (void*)(0));
+	glEnableVertexAttribArray(0);
+	glVertexAttribDivisor(0, 4);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[X]);
+	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), (void*)(0));
 	glEnableVertexAttribArray(1);
-	glVertexAttribDivisor(1, 1);
+	glVertexAttribDivisor(1, 4);
 
-	ERROR("errors?");	
-	
-	tempBuffer = (float*) malloc(MAX_LINES * (6 * 2 * sizeof(float)));
+	// binding and setting up floor vao
+	glBindVertexArray(vao[FLOOR]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[FLOOR_HEIGHT]);
+	glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), (void*)(0));
+	glEnableVertexAttribArray(0);
+	glVertexAttribDivisor(0, 4);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[X]);
+	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), (void*)(0));
+	glEnableVertexAttribArray(1);
+	glVertexAttribDivisor(1, 4);
+
+	// generating the buffers
+	// we definitely don't need more than the raycast count lines, ever
+	buffers[CEIL_HEIGHT] = (float*)malloc((size_t)RENDER_RAYCAST_COUNT * sizeof(float));
+	buffers[FLOOR_HEIGHT] = (float*)malloc((size_t)RENDER_RAYCAST_COUNT * sizeof(float));
+
+	ERROR("no errors?");
 }
 
 void levelDrawClear(void)
 {
-	positionInBuffer = 0;
+	// the only thing determining how "much" data is saved is the position in the buffer
+	// we don't actually have to 0 our temporary buffers
+	posInBuffer = 0;
 }
 
 void levelDrawTerminate(void)
 {
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO_instance);
+	glDeleteVertexArrays(3, vao);
+	glDeleteBuffers(4, vbo);
+	glDeleteProgram(ceilOrFloorShader);
 
-	VAO = VBO_instance = 0;
-
-	glDeleteProgram(lineShader);
-	lineShader = NO_PROGRAM;
+	free(buffers[CEIL_HEIGHT]);
+	free(buffers[FLOOR_HEIGHT]);
 }
-
-size_t fillInLine(float* dataStart, vec2f from, vec2f to, float width);
 
 void levelDraw(void)
 {
@@ -126,7 +168,6 @@ void levelDraw(void)
 
 	float breathingAnim = sinf(F(glfwGetTime()) * 1.2f) * 10.0f + 10.0f;
 	
-	int lineCount = 0;
 	for (int i = 0; i < RENDER_RAYCAST_COUNT; i++)
 	{
 		collisionData = castRay(playerPosition, curAngle);
@@ -137,14 +178,20 @@ void levelDraw(void)
 			lineHeight = MIN(unmaxLineHeight, F(VIEWPORT_HEIGHT));
 			lineOff = F(VIEWPORT_HEIGHT / 2) - lineHeight * 0.5f;
 
-			positionInBuffer += fillInLine(tempBuffer + positionInBuffer, VEC2F2_1(curDraw, 0), VEC2F2_1(curDraw, lineOff + breathingAnim), DRAW_STEP);
+			// we have to offset this from the ceiling
+			buffers[CEIL_HEIGHT][posInBuffer] = -1.0f - LIN_MAP(lineOff + breathingAnim, 0.0f, F(VIEWPORT_HEIGHT), -1.0f, 1.0f);
+			
+			buffers[FLOOR_HEIGHT][posInBuffer] = 1.0f - LIN_MAP(lineHeight + lineOff + breathingAnim, 0.0f, F(VIEWPORT_HEIGHT), -1.0f, 1.0f);
+
+			posInBuffer++;
+
+			//positionInBuffer += fillInLine(tempBuffer + positionInBuffer, VEC2F2_1(curDraw, 0), VEC2F2_1(curDraw, lineOff + breathingAnim), DRAW_STEP);
 
 			// using primitives until i set up instancing for texture lines
 			drawLineColored(curDraw, lineOff + breathingAnim, curDraw, lineHeight + lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.0f, 0.0f, 0.7f));
 
-			positionInBuffer += fillInLine(tempBuffer + positionInBuffer, VEC2F2_1(curDraw, lineHeight + lineOff + breathingAnim), VEC2F2_1(curDraw, F(VIEWPORT_HEIGHT)), DRAW_STEP);
+			//positionInBuffer += fillInLine(tempBuffer + positionInBuffer, VEC2F2_1(curDraw, lineHeight + lineOff + breathingAnim), VEC2F2_1(curDraw, F(VIEWPORT_HEIGHT)), DRAW_STEP);
 
-			lineCount += 2;			
 			//drawLineColored(curDraw, 0, curDraw, lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.4f, 0.4f, 0.4f));
 			//drawLineColored(curDraw, lineOff + breathingAnim, curDraw, lineHeight + lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.0f, 0.0f, 0.7f));
 			//drawLineColored(curDraw, lineHeight + lineOff + breathingAnim, curDraw, F(VIEWPORT_HEIGHT), DRAW_STEP, COLOR3_1(1.0f, 1.0f, 1.0f));
@@ -154,64 +201,27 @@ void levelDraw(void)
 		curAngle -= ANGLE_STEP;
 	}
 
-//	float test[] = 
-//	{
-//		-1.0f, -1.0f,
-//		1.0f, -1.0f,
-//		1.0f, 1.0f,
-//
-//		-1.0f, -1.0f,
-//		-1.0f, 1.0f,
-//		1.0f, 1.0f,
-//	};
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[CEIL_HEIGHT]);
+	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(posInBuffer * sizeof(float)), buffers[CEIL_HEIGHT], GL_DYNAMIC_DRAW);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[FLOOR_HEIGHT]);
+	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(posInBuffer * sizeof(float)), buffers[FLOOR_HEIGHT], GL_DYNAMIC_DRAW);
 
-	glBindVertexArray(VAO);
+	glUseProgram(ceilOrFloorShader);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_instance);
+	// ceiling
+	glBindVertexArray(vao[CEILING]);
+	glUniform1f(ybase, 1.0f);
+	glUniform4f(modulate, COLOR1_4(CEIL_COLOR));
 
-	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(positionInBuffer * sizeof(float)), tempBuffer, GL_DYNAMIC_DRAW);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 4 * (GLsizei) posInBuffer);
 
-	glUseProgram(lineShader);
+	// floor
+	glBindVertexArray(vao[FLOOR]);
+	glUniform1f(ybase, -1.0f);
+	glUniform4f(modulate, COLOR1_4(FLOOR_COLOR));
 
-	// this draws stuff
-	glDrawArraysInstanced(GL_TRIANGLES, 0, lineCount * 6, 2);
-	//glDrawArrays(GL_TRIANGLES, 0, lineCount * 6);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 4 * (GLsizei)posInBuffer);
 
-	ERROR("hi 2");
-}
-
-size_t fillInLine(float* dataStart, vec2f from, vec2f to, float width)
-{
-	from = screenToVertexPos(from);
-	to = screenToVertexPos(to);
-	width = screenSizeToNorm(VEC2F2_1(width, 0.0f)).x;
-
-	// first triangle
-	// top left
-	dataStart[0] = from.x - width;
-	dataStart[1] = from.y;
-
-	// bottom left
-	dataStart[2] = to.x - width;
-	dataStart[3] = to.y;
-
-	// bottom right
-	dataStart[4] = to.x + width;
-	dataStart[5] = to.y;
-
-	// second triangle
-	// top left
-	dataStart[6] = from.x - width;
-	dataStart[7] = from.y;
-
-	// top right
-	dataStart[8] = from.x + width;
-	dataStart[9] = from.y;
-
-	// bottom right
-	dataStart[10] = to.x + width;
-	dataStart[11] = to.y;
-
-	return 12;
-
+	ERROR("errors?");
 }
