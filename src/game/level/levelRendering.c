@@ -6,8 +6,8 @@
 
 #include <paths/shaderPaths.h>
 
-#define CEIL_COLOR COLOR3_1(1.0f, 0.0f, 0.0f)
-#define FLOOR_COLOR COLOR3_1(0.3f, 0.4f, 0.112668625789f)
+#define CEIL_COLOR COLOR3_1(0.4f, 0.4f, 0.6f)
+#define FLOOR_COLOR COLOR3_1(1.0f, 1.0f, 1.0f)
 
 enum VAOS
 {
