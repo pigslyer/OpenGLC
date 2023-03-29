@@ -1,5 +1,5 @@
-#include <player.h>
-#include <level.h>
+#include <game/player.h>
+#include <game/level.h>
 
 #define PLAYER_MOVEMENT_SPEED 5
 #define PLAYER_TURN_SPEED 0.08f
@@ -12,7 +12,7 @@ float playerRotation;
 void playerInit(void)
 {
 	playerPosition.x = playerPosition.y = 300;
-	playerRotation = 0;
+	playerRotation = PIf;
 }
 
 void playerUpdate(void)

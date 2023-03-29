@@ -2,6 +2,8 @@
 #include <rendering/shaders.h>
 #include <rendering/vboManager.h>
 
+#include <game/level.h>
+
 #include <helpers/filehelper.h>
 #include <paths/shaderPaths.h>
 
@@ -32,12 +34,14 @@ void drawInit(void)
 
 	drawTextInit();
 	drawPrimitivesInit();
+	levelDrawInit();
 }
 
 void drawTerminate(void)
 {
 	drawTextTerminate();
 	drawPrimitivesTerminate();
+	levelDrawTerminate();
 
 	for (int i = 0; i < ShaderCount; i++)
 	{
@@ -49,6 +53,7 @@ void drawClear(void)
 {
 	drawTextClear();
 	drawPrimitivesClear();
+	levelDrawClear();
 }
 
 

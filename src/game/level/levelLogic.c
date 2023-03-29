@@ -1,5 +1,5 @@
-#include <level.h>
-#include <player.h>
+#include <game/level.h>
+#include <game/player.h>
 
 #include <rendering/drawing.h>
 
@@ -138,7 +138,7 @@ rayData castRay(vec2f from, float angle)
 
 }
 
-void levelInit(void)
+void levelLogicInit(void)
 {
 	mapWidth = mapHeight = 8;
 	mapArea = 64;
@@ -155,73 +155,4 @@ void levelUpdate(void)
 	{
 		printf("magic number: %f\n", magic);
 	}
-}
-
-void levelDraw()
-{
-	
-//	// overhead view
-//	glLineWidth(8);
-//	glBegin(GL_QUADS);
-//
-//	vec2i tl;
-//
-//	for (int x = 0; x < mapWidth; x++)
-//	{
-//		tl.x = x * CELL_SIZE;
-//
-//		for (int y = 0; y < mapHeight; y++)
-//		{
-//			tl.y = y * CELL_SIZE;
-//
-//			if (map[y * mapWidth + x])
-//			{
-//				glColor3f(0, 0, 0);
-//			}
-//			else
-//			{
-//				glColor3f(1, 1, 1);
-//			}
-//
-//			glVertex2i(tl.x + 1, tl.y + 1);
-//			glVertex2i(tl.x + CELL_SIZE - 1, tl.y + 1);
-//			glVertex2i(tl.x + CELL_SIZE - 1, tl.y + CELL_SIZE - 1);
-//			glVertex2i(tl.x + 1, tl.y + CELL_SIZE - 1);
-//		}
-//	}
-//
-//	glEnd();
-
-	// "3d" view
-
-	const float ANGLE_STEP = PLAYER_FOV / F(RENDER_RAYCAST_COUNT);
-	const float DRAW_STEP = F(VIEWPORT_WIDTH) / F(RENDER_RAYCAST_COUNT); //F(VIEWPORT_WIDTH / 2) / F(RENDER_RAYCAST_COUNT);
-
-	float curAngle = playerRotation + PLAYER_FOV * 0.5f;
-	float curDraw = DRAW_STEP * 0.5f;//F(VIEWPORT_WIDTH / 2) + DRAW_STEP * 0.5f;
-	
-	float lineHeight, unmaxLineHeight, lineOff;
-	rayData collisionData;
-
-	float breathingAnim = sinf(F(glfwGetTime()) * 1.2f) * 10.0f + 10.0f;
-	for (int i = 0; i < RENDER_RAYCAST_COUNT; i++)
-	{
-		collisionData = castRay(playerPosition, curAngle);
-	
-		if (collisionData.hasHit)
-		{
-			unmaxLineHeight = F(50 * VIEWPORT_HEIGHT) / (collisionData.rayLength * cosf(playerRotation - curAngle));
-			lineHeight = MIN(unmaxLineHeight, F(VIEWPORT_HEIGHT));
-			lineOff = F(VIEWPORT_HEIGHT / 2) - lineHeight * 0.5f;
-
-
-			drawLineColored(curDraw, 0, curDraw, lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.4f, 0.4f, 0.4f));
-			drawLineColored(curDraw, lineOff + breathingAnim, curDraw, lineHeight + lineOff + breathingAnim, DRAW_STEP, COLOR3_1(0.0f, 0.0f, 0.7f));
-			drawLineColored(curDraw, lineHeight + lineOff + breathingAnim, curDraw, F(VIEWPORT_HEIGHT), DRAW_STEP, COLOR3_1(1.0f, 1.0f, 1.0f));
-		}
-
-		curDraw += DRAW_STEP;
-		curAngle -= ANGLE_STEP;
-	}
-	
 }
