@@ -18,7 +18,7 @@
 #define MIN(val1, val2) ((val1) < (val2) ? (val1) : (val2))
 #define ABS(value) ((value) > 0 ? (value) : (-value))
 
-#define LIN_MAP(value, omin, omax, nmin, nmax) (((value) - (omin)) / ((omax) - (omin)) * (nmax - nmin) + (nmin))
+#define LIN_MAP(value, omin, omax, nmin, nmax) (((value) - (omin)) / ((omax) - (omin)) * ((nmax) - (nmin)) + (nmin))
 
 struct vec2i
 {
