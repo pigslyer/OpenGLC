@@ -1,11 +1,8 @@
 #version 330 core
 
-
 // the atlas texture
 uniform sampler2D atlasTexture;
 uniform vec4 modulation;
-
-in vec2 vertexCoord;
 
 // expecting rasterization to properly interpolate UV
 in vec2 texCoord;
