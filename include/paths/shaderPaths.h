@@ -6,6 +6,7 @@ extern const char* const FRAG_EQUALS_MODULATE_UNIFORM_FRAG;
 
 extern const char* const ATLAS_MODULATE_VERT;
 extern const char* const ATLAS_MODULATE_FRAG;
+extern const char* const ATLAS_MODULATE_MONOCHROME_FRAG;
 
 extern const char* const BASIC2D_MODULATE_VERT;
 extern const char* const BASIC2D_MODULATE_FRAG;

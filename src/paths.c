@@ -6,6 +6,7 @@
 
 const char* const ATLAS_MODULATE_VERT = "shaders/atlasModulate.vert";
 const char* const ATLAS_MODULATE_FRAG = "shaders/atlasModulate.frag";
+const char* const ATLAS_MODULATE_MONOCHROME_FRAG = "shaders/atlasModulateMonochrome.frag";
 
 const char* const BASIC2D_MODULATE_VERT = "shaders/basicUniformModulate.vert";
 const char* const BASIC2D_MODULATE_FRAG = "shaders/basicUniformModulate.frag";
@@ -19,3 +20,4 @@ const char* const FRAG_EQUALS_MODULATE_UNIFORM_FRAG = "shaders/fragEqualsModulat
 /// TEXTURES
 
 const char* const FONT = "assets/font.bmp";
+const char* const WALLS = "assets/test.bmp";

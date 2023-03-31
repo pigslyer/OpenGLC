@@ -13,12 +13,12 @@ int mapArea;
 int map[] = 
 {
 	1,1,1,1,1,1,1,1,
-	1,0,1,0,0,0,0,1,
+	1,0,0,0,0,0,0,1,
+	1,0,0,0,0,0,0,1,
+	1,0,0,0,0,0,0,1,
 	1,0,1,0,0,0,0,1,
 	1,0,0,0,0,0,0,1,
-	1,0,0,0,0,1,0,1,
-	1,0,1,0,0,0,0,1,
-	1,0,0,0,1,0,0,1,
+	1,0,0,0,0,0,0,1,
 	1,1,1,1,1,1,1,1,
 };
 
@@ -126,15 +126,22 @@ rayData castRay(vec2f from, float angle)
 
 	if (hDist == INFINITY && vDist == INFINITY)
 	{
-		return (rayData){false, 0, 0, 0, 0, -1};
+		return (rayData){false, 0, 0, 0, 0, -1, -1, 0};
 	}
 
 	if (hDist < vDist)
 	{
-		return (rayData){true, horzRes, horzMap, hDist};
+		vertRes = horzRes; vertMap = horzMap; vDist = hDist;
 	}
 
-	return (rayData){true, vertRes, vertMap, vDist};
+	int mapTile = map[vertMap.y * mapWidth + vertMap.x];
+	// we know that out of the real position coords, one of them will be
+	// exactly atop a gridline
+	vec2f normalized = VEC2F2_1(vertRes.x / F(CELL_SIZE), vertRes.y / F(CELL_SIZE));
+	normalized = VEC2F2_1(normalized.x - floorf(normalized.x), normalized.y - floorf(normalized.y));
+	float wallPercentageHit = MIN(normalized.x, normalized.y);
+
+	return (rayData){true, vertRes, vertMap, vDist, mapTile - 1, wallPercentageHit};
 
 }
 

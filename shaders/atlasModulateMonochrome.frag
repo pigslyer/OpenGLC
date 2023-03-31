@@ -11,6 +11,6 @@ out vec4 FragColor;
 
 void main()
 {
-//	FragColor = vec4(texCoord, 0.0f, 1.0f);
-	FragColor = texture(atlasTexture, texCoord);
+	float red = texture(atlasTexture, texCoord).r;
+	FragColor = vec4(modulation.rgb, (1.0 - red) * modulation.a);
 }

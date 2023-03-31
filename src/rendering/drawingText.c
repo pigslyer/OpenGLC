@@ -26,7 +26,7 @@ void setupAtlasVbo(void);
 
 void drawTextInit(void)
 {
-	atlasShader = loadShader(ATLAS_MODULATE_VERT, ATLAS_MODULATE_FRAG);
+	atlasShader = loadShader(ATLAS_MODULATE_VERT, ATLAS_MODULATE_MONOCHROME_FRAG);
 
 	glUseProgram(atlasShader);
 	// this is a constant, might as well set it once

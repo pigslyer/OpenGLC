@@ -30,7 +30,7 @@ void drawInit(void)
 	// shader loading
 
 	shaders[UniformModulatableBasicShader] = loadShader(BASIC2D_MODULATE_VERT, BASIC2D_MODULATE_FRAG);
-	shaders[AtlasShader] = loadShader(ATLAS_MODULATE_VERT, ATLAS_MODULATE_FRAG);
+	shaders[AtlasShader] = loadShader(ATLAS_MODULATE_VERT, ATLAS_MODULATE_MONOCHROME_FRAG);
 
 	drawTextInit();
 	drawPrimitivesInit();

@@ -9,6 +9,9 @@ struct rayData
 	vec2f globalPosHit;
 	vec2i mapPosHit;
 	float rayLength;
+	int wallHit;
+	// [0, 1], 0 = hit left side of wall, 1 = hit right side
+	float wallPercentageHit;
 } typedef rayData;
 
 
