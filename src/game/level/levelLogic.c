@@ -129,17 +129,37 @@ rayData castRay(vec2f from, float angle)
 		return (rayData){false, 0, 0, 0, 0, -1, -1, 0};
 	}
 
+
+	int mapTile;
+	float wallPercentageHit;
 	if (hDist < vDist)
 	{
 		vertRes = horzRes; vertMap = horzMap; vDist = hDist;
+		mapTile = map[horzMap.y * mapWidth + horzMap.x];
+		
+		wallPercentageHit = vertRes.x / CELL_SIZEF;
+		wallPercentageHit = wallPercentageHit - floorf(wallPercentageHit);
+
+		if (sin < -0.001f)
+		{
+			wallPercentageHit = 1.0f - wallPercentageHit;
+		}
+	}
+	else
+	{
+		mapTile = map[vertMap.y * mapWidth + vertMap.x];
+
+		wallPercentageHit = vertRes.y / CELL_SIZEF;
+
+		wallPercentageHit = wallPercentageHit - floorf(wallPercentageHit);
+
+		if (cos < -0.001f)
+		{
+			wallPercentageHit = 1.0f - wallPercentageHit;
+		}
 	}
 
-	int mapTile = map[vertMap.y * mapWidth + vertMap.x];
-	// we know that out of the real position coords, one of them will be
-	// exactly atop a gridline
-	vec2f normalized = VEC2F2_1(vertRes.x / F(CELL_SIZE), vertRes.y / F(CELL_SIZE));
-	normalized = VEC2F2_1(normalized.x - floorf(normalized.x), normalized.y - floorf(normalized.y));
-	float wallPercentageHit = MIN(normalized.x, normalized.y);
+	
 
 	return (rayData){true, vertRes, vertMap, vDist, mapTile - 1, wallPercentageHit};
 
@@ -151,15 +171,7 @@ void levelLogicInit(void)
 	mapArea = 64;
 }
 
-float magic = 0.0f;
-
 void levelUpdate(void)
 {
-	float diff = F(GET_KEY(GLFW_KEY_T) - GET_KEY(GLFW_KEY_G));
-	magic += diff;
 
-	if (GET_KEY(GLFW_KEY_SPACE))
-	{
-		printf("magic number: %f\n", magic);
-	}
 }

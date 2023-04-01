@@ -165,12 +165,12 @@ void levelDrawInit(void)
 
 	free(textureData);
 
-	vec2f atlasTextureSize = VEC2F2_1((1.0f / F(wallFramesH)), -1.0f / F(wallFramesV));
+	vec2f atlasTextureSize = VEC2F2_1((1.0f / F(wallFramesH)) * 2.0f / F(RENDER_RAYCAST_COUNT), -1.0f / F(wallFramesV));
 
 	// set up wall shader with texture data
 	glUseProgram(wallShader);
 	glUniform1i(glGetUniformLocation(wallShader, "atlasTexture"), wallActiveTexture);
-	glUniform2f(glGetUniformLocation(wallShader, "atlasTextureSize"), atlasTextureSize.x, atlasTextureSize.y);
+	glUniform2f(glGetUniformLocation(wallShader, "atlasTextureSize"), -atlasTextureSize.x, atlasTextureSize.y);
 	
 	printf("%f, %f\n", atlasTextureSize.x, atlasTextureSize.y);
 
@@ -246,10 +246,6 @@ void levelDraw(void)
 		curAngle -= ANGLE_STEP;
 	}
 
-//	for (int i = 0; i < 100; i++)
-//	{
-//		printf("%d, x: %f, y: %f\n", i, buffers[ATLAS_POS][i * 2], buffers[ATLAS_POS][i * 2 + 1]);
-//	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[CEIL_HEIGHT]);
 	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(posInBuffer * sizeof(float)), buffers[CEIL_HEIGHT], GL_DYNAMIC_DRAW);
