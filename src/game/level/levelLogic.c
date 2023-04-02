@@ -22,11 +22,18 @@ int map[] =
 	1,1,1,1,1,1,1,1,
 };
 
-rayData castRay(vec2f from, float angle)
+void castRay(vec2f from, float angle, rayResults* results)
 {
+	// a pair of static tables we fill in as needed. they'll exist outside of all scopes,
+	// we then just set which one rayResults should use
+	// very clean and efficient, imo
+	static rayData hHits[MAX_RAY_RESULTS];
+	static rayData vHits[MAX_RAY_RESULTS];
+
 	int dof = 0;
 
 	float hDist = INFINITY, vDist = INFINITY;
+	int hHitCount = 0, vHitCount = 0;
 
 	float sin, cos, tan, cotan;
 	sincosf(angle, &sin, &cos);
@@ -42,7 +49,7 @@ rayData castRay(vec2f from, float angle)
 	// looking right
 	if (cos > 0.001f)
 	{
-		vertRes.x = (float)((((int)from.x) >> POWER_OF_SIZE) << POWER_OF_SIZE) + CELL_SIZEF;
+		vertRes.x = F(((I(from.x)) >> POWER_OF_SIZE) << POWER_OF_SIZE) + CELL_SIZEF;
 		vertRes.y = (from.x - vertRes.x) * tan + from.y;
 		off.x = CELL_SIZEF;
 		off.y = -off.x * tan;
@@ -50,7 +57,7 @@ rayData castRay(vec2f from, float angle)
 	// looking left
 	else if (cos < -0.001f)
 	{
-		vertRes.x = (float)((((int)from.x) >> POWER_OF_SIZE) << POWER_OF_SIZE) - 0.0001f;
+		vertRes.x = F(((I(from.x)) >> POWER_OF_SIZE) << POWER_OF_SIZE) - 0.0001f;
 		vertRes.y = (from.x - vertRes.x) * tan + from.y;
 		off.x = -CELL_SIZEF;
 		off.y = -off.x * tan;
@@ -65,8 +72,8 @@ rayData castRay(vec2f from, float angle)
 
 	while (dof < RENDER_RAYCAST_DOF_MAX)
 	{
-		vertMap.x = ((int)vertRes.x) >> POWER_OF_SIZE;
-		vertMap.y = ((int)vertRes.y) >> POWER_OF_SIZE;
+		vertMap.x = I(vertRes.x) >> POWER_OF_SIZE;
+		vertMap.y = I(vertRes.y) >> POWER_OF_SIZE;
 
 
 		mult = vertMap.x * vertMap.y;
@@ -75,6 +82,8 @@ rayData castRay(vec2f from, float angle)
 			vDist = cos * (vertRes.x - from.x) - sin * (vertRes.y - from.y);
 			break;
 		}
+
+		// check for collisions with entities here
 
 		vertRes.x += off.x;
 		vertRes.y += off.y;
@@ -88,14 +97,14 @@ rayData castRay(vec2f from, float angle)
 	// looking up
 	if (sin > 0.001f)
 	{
-		horzRes.y = (float)(((int)(from.y) >> POWER_OF_SIZE) << POWER_OF_SIZE) - 0.0001f;
+		horzRes.y = F((I(from.y) >> POWER_OF_SIZE) << POWER_OF_SIZE) - 0.0001f;
 		horzRes.x = (from.y - horzRes.y) * cotan + from.x;
 		off.y = -CELL_SIZEF;
 		off.x = -off.y * cotan;
 	}
 	else if (sin < -0.001f)
 	{
-		horzRes.y = (float)(((int)(from.y) >> POWER_OF_SIZE) << POWER_OF_SIZE) + CELL_SIZEF;
+		horzRes.y = F((I(from.y) >> POWER_OF_SIZE) << POWER_OF_SIZE) + CELL_SIZEF;
 		horzRes.x = (from.y - horzRes.y) * cotan + from.x;
 		off.y = CELL_SIZEF;
 		off.x = -off.y * cotan;
@@ -109,8 +118,8 @@ rayData castRay(vec2f from, float angle)
 
 	while (dof < RENDER_RAYCAST_DOF_MAX)
 	{
-		horzMap.x = ((int)horzRes.x) >> POWER_OF_SIZE;
-		horzMap.y = ((int)horzRes.y) >> POWER_OF_SIZE;
+		horzMap.x = I(horzRes.x) >> POWER_OF_SIZE;
+		horzMap.y = I(horzRes.y) >> POWER_OF_SIZE;
 
 		mult = horzMap.x * horzMap.y;
 		if (mult >= 0 && mult < mapArea && map[horzMap.y * mapWidth + horzMap.x] != 0)
@@ -119,49 +128,77 @@ rayData castRay(vec2f from, float angle)
 			break;
 		}
 
+		// check for collisions with entities here
+
 		horzRes.x += off.x;
 		horzRes.y += off.y;
 		dof += 1;
 	}
 
-	if (hDist == INFINITY && vDist == INFINITY)
+	// if we've hit a wall we have to properly record data for it
+	// and also set which result data to use
+	if (hDist != INFINITY || vDist != INFINITY)
 	{
-		return (rayData){false, 0, 0, 0, 0, -1, -1, 0};
-	}
 
-
-	int mapTile;
-	float wallPercentageHit;
-	if (hDist < vDist)
-	{
-		vertRes = horzRes; vertMap = horzMap; vDist = hDist;
-		mapTile = map[horzMap.y * mapWidth + horzMap.x];
-		
-		wallPercentageHit = vertRes.x / CELL_SIZEF;
-		wallPercentageHit = wallPercentageHit - floorf(wallPercentageHit);
-
-		if (sin < -0.001f)
+		int mapTile;
+		float wallPercentageHit;
+		if (hDist < vDist)
 		{
-			wallPercentageHit = 1.0f - wallPercentageHit;
+			results->results = hHits;
+			results->resultCount = hHitCount;
+
+			vertRes = horzRes; vertMap = horzMap; vDist = hDist;
+			mapTile = map[horzMap.y * mapWidth + horzMap.x];
+			
+			wallPercentageHit = vertRes.x / CELL_SIZEF;
+			wallPercentageHit = wallPercentageHit - floorf(wallPercentageHit);
+
+			if (sin < -0.001f)
+			{
+				wallPercentageHit = 1.0f - wallPercentageHit;
+			}
 		}
+		else
+		{
+			results->results = vHits;
+			results->resultCount = vHitCount;
+
+			mapTile = map[vertMap.y * mapWidth + vertMap.x];
+
+			wallPercentageHit = vertRes.y / CELL_SIZEF;
+
+			wallPercentageHit = wallPercentageHit - floorf(wallPercentageHit);
+
+			if (cos < -0.001f)
+			{
+				wallPercentageHit = 1.0f - wallPercentageHit;
+			}
+		}
+
+		rayData* wallData = &(results->results[results->resultCount++]);
+		
+		wallData->globalPosHit = vertRes;
+		wallData->rayLength = vDist;
+		wallData->wallTileHit = mapTile - 1;
+		wallData->xHit = wallPercentageHit;
 	}
+	// um... if we didn't hit a wall, use the more populated list to be nice?
+	// not gonna lie, this seems dangerous
 	else
 	{
-		mapTile = map[vertMap.y * mapWidth + vertMap.x];
-
-		wallPercentageHit = vertRes.y / CELL_SIZEF;
-
-		wallPercentageHit = wallPercentageHit - floorf(wallPercentageHit);
-
-		if (cos < -0.001f)
+		if (hHitCount > vHitCount)
 		{
-			wallPercentageHit = 1.0f - wallPercentageHit;
+			results->results = hHits;
+			results->resultCount = hHitCount;
+		}
+		else
+		{
+			results->results = vHits;
+			results->resultCount = vHitCount;
 		}
 	}
 
-	
-
-	return (rayData){true, vertRes, vertMap, vDist, mapTile - 1, wallPercentageHit};
+	//return (rayData){true, vertRes, vertMap, vDist, mapTile - 1, wallPercentageHit};
 
 }
 

@@ -211,26 +211,30 @@ void levelDraw(void)
 	float curDraw = DRAW_STEP * 0.5f;
 	
 	float lineHeight, unmaxLineHeight, lineOff;
-	rayData collisionData;
+	rayResults collisionData;
+	rayData* currentData;
 
 	float breathingAnim = sinf(F(glfwGetTime()) * 1.2f) * 10.0f + 10.0f;
 	vec2i atlasPos;
 	for (int i = 0; i < RENDER_RAYCAST_COUNT; i++)
 	{
-		collisionData = castRay(playerPosition, curAngle);
-	
-		if (collisionData.hasHit)
+		castRay(playerPosition, curAngle, &collisionData);
+
+		// process mob collisions
+
+		// we've hit a wall
+		if (collisionData.resultCount > 0 && (currentData = &collisionData.results[collisionData.resultCount-1])->mobData == NULL)
 		{
-			unmaxLineHeight = F(50 * VIEWPORT_HEIGHT) / (collisionData.rayLength * cosf(playerRotation - curAngle));
+			unmaxLineHeight = F(50 * VIEWPORT_HEIGHT) / (currentData->rayLength * cosf(playerRotation - curAngle));
 			lineHeight = MIN(unmaxLineHeight, F(VIEWPORT_HEIGHT));
 			lineOff = F(VIEWPORT_HEIGHT / 2) - lineHeight * 0.5f;
 
 			buffers[CEIL_HEIGHT][posInBuffer] = LIN_MAP(lineOff + breathingAnim, 0.0f, F(VIEWPORT_HEIGHT), -1.0f, 1.0f);;
 			buffers[FLOOR_HEIGHT][posInBuffer] = LIN_MAP(lineHeight + lineOff + breathingAnim, 0.0f, F(VIEWPORT_HEIGHT), -1.0f, 1.0f);
 
-			atlasPos = VEC2I2_1(collisionData.wallHit % wallFramesH, collisionData.wallHit / wallFramesH);
+			atlasPos = VEC2I2_1(currentData->wallTileHit % wallFramesH, currentData->wallTileHit / wallFramesH);
 			
-			buffers[ATLAS_POS][(posInBuffer * 2) + 0] = F(atlasPos.x) * (1.0f / F(wallFramesH)) + collisionData.wallPercentageHit;
+			buffers[ATLAS_POS][(posInBuffer * 2) + 0] = F(atlasPos.x) * (1.0f / F(wallFramesH)) + currentData->xHit;
 			buffers[ATLAS_POS][(posInBuffer * 2) + 1] = 1.0f - F(atlasPos.y) * (1.0f / F(wallFramesV));
 
 			posInBuffer++;

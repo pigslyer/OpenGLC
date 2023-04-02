@@ -3,16 +3,30 @@
 
 #include <global.h>
 
+// this should contain a reference to the hit instance if it records an instance hit
+// reference should be NULL otherwise to check if we collided with a wall at the end
+// if that isn't null, wallTileHit should contain the tile we hit. 
+// Checking wallTileHit when that reference is NULL is undefined
 struct rayData
 {
-	bool hasHit;
+	int* mobData;
 	vec2f globalPosHit;
-	vec2i mapPosHit;
 	float rayLength;
-	int wallHit;
-	// [0, 1], 0 = hit left side of wall, 1 = hit right side
-	float wallPercentageHit;
+	int wallTileHit;
+	// [0, 1], 0 = hit left side of thing, 1 = hit right side
+	float xHit;
 } typedef rayData;
+
+// I HATE THIS I HATE THIS I HATE THIS
+// has to be a #define for the hHits and vHits static
+// declaration in castRay
+#define MAX_RAY_RESULTS  32
+
+struct rayResults
+{
+	rayData* results;
+	int resultCount;
+} typedef rayResults;
 
 
 // --------------------------------------------------------- 
@@ -20,7 +34,7 @@ struct rayData
 void levelLogicInit(void);
 void levelUpdate(void);
 
-rayData castRay(vec2f from, float direction);
+void castRay(vec2f from, float direction, rayResults* results);
 
 // ---------------------------------------------------------
 // implemented in levelRendering.c
