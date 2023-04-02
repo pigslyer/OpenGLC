@@ -226,7 +226,7 @@ void levelDraw(void)
 		if (collisionData.resultCount > 0 && (currentData = &collisionData.results[collisionData.resultCount-1])->mobData == NULL)
 		{
 			unmaxLineHeight = F(50 * VIEWPORT_HEIGHT) / (currentData->rayLength * cosf(playerRotation - curAngle));
-			lineHeight = MIN(unmaxLineHeight, F(VIEWPORT_HEIGHT));
+			lineHeight = unmaxLineHeight;
 			lineOff = F(VIEWPORT_HEIGHT / 2) - lineHeight * 0.5f;
 
 			buffers[CEIL_HEIGHT][posInBuffer] = LIN_MAP(lineOff + breathingAnim, 0.0f, F(VIEWPORT_HEIGHT), -1.0f, 1.0f);;
