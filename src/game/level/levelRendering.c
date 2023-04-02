@@ -171,8 +171,6 @@ void levelDrawInit(void)
 	glUseProgram(wallShader);
 	glUniform1i(glGetUniformLocation(wallShader, "atlasTexture"), wallActiveTexture);
 	glUniform2f(glGetUniformLocation(wallShader, "atlasTextureSize"), -atlasTextureSize.x, atlasTextureSize.y);
-	
-	printf("%f, %f\n", atlasTextureSize.x, atlasTextureSize.y);
 
 	ERROR("no errors?");
 }
