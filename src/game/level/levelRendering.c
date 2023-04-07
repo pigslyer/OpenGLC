@@ -15,12 +15,14 @@
 
 enum VAOS
 {
-	CEILING, WALL, FLOOR
+	CEILING, WALL, FLOOR, OVERHEAD, VAO_COUNT
 };
+
+#define RECT_COORD_MAX_COUNT 500
 
 enum VBOS
 {
-	CEIL_HEIGHT, FLOOR_HEIGHT, ATLAS_POS, X 
+	CEIL_HEIGHT, FLOOR_HEIGHT, ATLAS_POS, X, OVERHEAD_COORDS, VBO_COUNT
 };
 
 static const int wallFramesH = 1;
@@ -28,12 +30,12 @@ static const int wallFramesV = 1;
 static const int wallActiveTexture = 14;
 static texture wallTexture;
 
-static ObjID vao[3];
+static ObjID vao[VAO_COUNT];
 
 static size_t posInBuffer;
-static float* buffers[3];
+static float* buffers[VBO_COUNT];
 
-static ObjID vbo[4];
+static ObjID vbo[VBO_COUNT];
 
 static ObjID ceilOrFloorShader;
 static ShdLoc cfModulate, cfXoffset, cfYbase;
@@ -41,12 +43,15 @@ static ShdLoc cfModulate, cfXoffset, cfYbase;
 static ObjID wallShader;
 static ShdLoc wModulate, wOffset;
 
+static ObjID rectShader;
+static ShdLoc rModulate;
+
 void levelDrawInit(void)
 {
 
 	// generating opengl buffers
-	glGenVertexArrays(3, vao);
-	glGenBuffers(4, vbo);
+	glGenVertexArrays(VAO_COUNT, vao);
+	glGenBuffers(VBO_COUNT, vbo);
 
 	// generating ceiling and floor shader
 	ceilOrFloorShader = loadShader(LINE_FROM_XY_VERT, FRAG_EQUALS_MODULATE_UNIFORM_FRAG);
@@ -60,6 +65,10 @@ void levelDrawInit(void)
 
 	wModulate = glGetUniformLocation(wallShader, "modulate");
 	wOffset = glGetUniformLocation(wallShader, "xoffset");
+
+	// generating rectangle shader
+	rectShader = loadShader(GL_POSITION_EQUALS_UV_2, FRAG_EQUALS_MODULATE_UNIFORM_FRAG);
+	rModulate = glGetUniformLocation(rectShader, "modulate");
 
 	// calculating xoffsets and xbases
 
@@ -139,13 +148,24 @@ void levelDrawInit(void)
 	glEnableVertexAttribArray(3);
 	glVertexAttribDivisor(3, 4);
 
+	// binding and setting up rect VAO
+	glBindVertexArray(vao[OVERHEAD]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[OVERHEAD_COORDS]);
+	
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(0));
+	glEnableVertexAttribArray(0);
+
 	// generating the buffers
 	// we definitely don't need more than the raycast count lines, ever
-	buffers[CEIL_HEIGHT] = (float*)malloc((size_t)RENDER_RAYCAST_COUNT * sizeof(float));
-	buffers[FLOOR_HEIGHT] = (float*)malloc((size_t)RENDER_RAYCAST_COUNT * sizeof(float));
-	buffers[ATLAS_POS] = (float*)malloc((size_t)RENDER_RAYCAST_COUNT * 2 * sizeof(float));
+	buffers[CEIL_HEIGHT] = 		(float*)malloc((size_t)RENDER_RAYCAST_COUNT * sizeof(float));
+	buffers[FLOOR_HEIGHT] = 	(float*)malloc((size_t)RENDER_RAYCAST_COUNT * sizeof(float));
+	buffers[ATLAS_POS] = 		(float*)malloc((size_t)RENDER_RAYCAST_COUNT * 2 * sizeof(float));
+	buffers[OVERHEAD_COORDS] = 		(float*)malloc(RECT_COORD_MAX_COUNT * 2 * sizeof(float));
 
 	// generate wall textures
+	glBindVertexArray(vao[WALL]);
+
 	int channelNum;
 	unsigned char* textureData = readBmp(WALLS, &wallTexture.width, &wallTexture.height, &channelNum);
 
@@ -184,8 +204,8 @@ void levelDrawClear(void)
 
 void levelDrawTerminate(void)
 {
-	glDeleteVertexArrays(3, vao);
-	glDeleteBuffers(4, vbo);
+	glDeleteVertexArrays(VAO_COUNT, vao);
+	glDeleteBuffers(VBO_COUNT, vbo);
 	
 	glDeleteProgram(ceilOrFloorShader);
 	glDeleteProgram(wallShader);
@@ -195,11 +215,11 @@ void levelDrawTerminate(void)
 	free(buffers[CEIL_HEIGHT]);
 	free(buffers[FLOOR_HEIGHT]);
 	free(buffers[ATLAS_POS]);
+	free(buffers[OVERHEAD_COORDS]);
 }
 
 void levelDraw(void)
 {
-
 	// "3d" view
 
 	const float ANGLE_STEP = PLAYER_FOV / F(RENDER_RAYCAST_COUNT);
@@ -217,7 +237,7 @@ void levelDraw(void)
 	for (int i = 0; i < RENDER_RAYCAST_COUNT; i++)
 	{
 		castRay(playerPosition, curAngle, &collisionData);
-
+		
 		// process mob collisions
 
 		// we've hit a wall
@@ -283,4 +303,103 @@ void levelDraw(void)
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 4 * (GLsizei)posInBuffer);
 
 	ERROR("errors?");
+
+	// overhead map
+	if (GET_KEY(GLFW_KEY_TAB))
+	{
+		const float anchorLeft = -0.8f, anchorRight = 0.8f, anchorTop = -0.8f, anchorBottom = 0.8f;
+		const float viewportWidth = anchorRight - anchorLeft, viewportHeight = anchorBottom - anchorTop;
+
+		float rect[] = 
+		{
+			// triangle 1
+			// top left
+			anchorLeft, anchorTop,
+
+			// top right
+			anchorRight, anchorTop,
+
+			// bottom right
+			anchorRight, anchorBottom,
+
+			// triangle 2
+			// top left
+			anchorLeft, anchorTop,
+			
+			// bottom left
+			anchorLeft, anchorBottom,
+
+			// bottom right
+			anchorRight, anchorBottom,
+		};
+
+		glUseProgram(rectShader);
+		glUniform4f(rModulate, COLOR1_4(COLOR4_1(0.8f, 1.0f, 0.8f, 1.0f)));
+
+		glBindVertexArray(vao[OVERHEAD]);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[OVERHEAD_COORDS]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_DYNAMIC_DRAW);
+
+		glDrawArrays(GL_TRIANGLES, 0, sizeof(rect) / sizeof(float));
+
+		const float tileOffset = 0.001f;
+		float tileWidth = viewportWidth / F(mapWidth), tileHeight = viewportHeight / F(mapHeight);
+
+		size_t pos = 0;
+
+		for (int x = 0; x < mapWidth; x++)
+		{
+			for (int y = 0; y < mapHeight; y++)
+			{
+				if (map[(mapHeight - y - 1) * mapWidth + x] != 0)
+				{
+					// triangle 1
+					// bottom left
+					buffers[OVERHEAD_COORDS][pos + 0] = anchorLeft + F(x + 0) * tileWidth + tileOffset;
+					buffers[OVERHEAD_COORDS][pos + 1] = anchorTop +  F(y + 0) * tileHeight + tileOffset;
+					
+					// bottom right
+					buffers[OVERHEAD_COORDS][pos + 2] = anchorLeft + F(x + 1) * tileWidth - tileOffset * 2;
+					buffers[OVERHEAD_COORDS][pos + 3] = anchorLeft + F(y + 0) * tileWidth + tileOffset;
+
+					// top left
+					buffers[OVERHEAD_COORDS][pos + 4] = anchorLeft + F(x + 0) * tileWidth + tileOffset;
+					buffers[OVERHEAD_COORDS][pos + 5] = anchorLeft + F(y + 1) * tileWidth - tileOffset * 2;
+
+					// triangle 2
+					// bottom left
+					buffers[OVERHEAD_COORDS][pos + 6] = anchorLeft + F(x + 1) * tileWidth - tileOffset * 2;
+					buffers[OVERHEAD_COORDS][pos + 7] = anchorTop  + F(y + 0) * tileHeight + tileOffset;
+					
+					// top right
+					buffers[OVERHEAD_COORDS][pos + 8] = anchorLeft + F(x + 1) * tileWidth - tileOffset * 2;
+					buffers[OVERHEAD_COORDS][pos + 9] = anchorTop  + F(y + 1) * tileWidth - tileOffset * 2;
+
+					// top left
+					buffers[OVERHEAD_COORDS][pos + 10] = anchorLeft + F(x + 0) * tileWidth + tileOffset;
+					buffers[OVERHEAD_COORDS][pos + 11] = anchorTop  + F(y + 1) * tileWidth - tileOffset * 2;
+
+					pos += 12;
+				} 
+			}
+		}
+
+		glUniform4f(rModulate, COLOR1_4(COLOR4_1(0.0f, 0.0f, 0.0f, 0.8f)));
+
+		glBufferData(GL_ARRAY_BUFFER, I(sizeof(float) * pos), buffers[OVERHEAD_COORDS], GL_DYNAMIC_DRAW);
+		glDrawArrays(GL_TRIANGLES, 0, I(pos / 2));
+
+		vec2f mappedPlayer = VEC2F2_1(
+			LIN_MAP(playerPosition.x, 0, mapWidth * 64, anchorLeft, anchorRight),
+			LIN_MAP(playerPosition.y, 0, mapHeight * 64, anchorTop, anchorBottom)
+		);
+
+		float playerPos[] = 
+		{
+			
+		};
+
+		
+	}
 }

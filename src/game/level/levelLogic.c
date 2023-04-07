@@ -13,11 +13,11 @@ int mapArea;
 int map[] = 
 {
 	1,1,1,1,1,1,1,1,
-	1,0,0,0,0,0,0,1,
-	1,0,0,0,0,0,0,1,
-	1,0,0,0,0,0,0,1,
 	1,0,1,0,0,0,0,1,
-	1,0,0,0,0,0,0,1,
+	1,0,1,0,0,0,0,1,
+	1,0,1,0,0,0,0,1,
+	1,0,1,0,0,0,0,1,
+	1,0,1,0,0,0,0,1,
 	1,0,0,0,0,0,0,1,
 	1,1,1,1,1,1,1,1,
 };
@@ -41,7 +41,7 @@ void castRay(vec2f from, float angle, rayResults* results)
 	cotan = 1 / tan;
 
 	vec2f off;
-	int mult;
+	//int mult;
 
 	// vertical bit
 	vec2f vertRes; vec2i vertMap;
@@ -75,9 +75,7 @@ void castRay(vec2f from, float angle, rayResults* results)
 		vertMap.x = I(vertRes.x) >> POWER_OF_SIZE;
 		vertMap.y = I(vertRes.y) >> POWER_OF_SIZE;
 
-
-		mult = vertMap.x * vertMap.y;
-		if (mult >= 0 && mult < mapArea && map[vertMap.y * mapWidth + vertMap.x] != 0)
+		if (vertMap.x >= 0 && vertMap.x < mapWidth && vertMap.y >= 0 && vertMap.y < mapHeight && map[vertMap.y * mapWidth + vertMap.x] != 0)
 		{
 			vDist = cos * (vertRes.x - from.x) - sin * (vertRes.y - from.y);
 			break;
@@ -121,8 +119,7 @@ void castRay(vec2f from, float angle, rayResults* results)
 		horzMap.x = I(horzRes.x) >> POWER_OF_SIZE;
 		horzMap.y = I(horzRes.y) >> POWER_OF_SIZE;
 
-		mult = horzMap.x * horzMap.y;
-		if (mult >= 0 && mult < mapArea && map[horzMap.y * mapWidth + horzMap.x] != 0)
+		if (horzMap.x >= 0 && horzMap.x < mapWidth && horzMap.y >= 0 && horzMap.y < mapHeight && map[horzMap.y * mapWidth + horzMap.x] != 0)
 		{
 			hDist = cos * (horzRes.x - from.x) - sin * (horzRes.y - from.y);
 			break;
@@ -139,7 +136,6 @@ void castRay(vec2f from, float angle, rayResults* results)
 	// and also set which result data to use
 	if (hDist != INFINITY || vDist != INFINITY)
 	{
-
 		int mapTile;
 		float wallPercentageHit;
 		if (hDist < vDist)
@@ -152,6 +148,8 @@ void castRay(vec2f from, float angle, rayResults* results)
 			
 			wallPercentageHit = vertRes.x / CELL_SIZEF;
 			wallPercentageHit = wallPercentageHit - floorf(wallPercentageHit);
+
+			results->normal = VEC2F2_1(0, F(-1 + (vertRes.y < from.y) * 2));
 
 			if (sin < -0.001f)
 			{
@@ -166,8 +164,9 @@ void castRay(vec2f from, float angle, rayResults* results)
 			mapTile = map[vertMap.y * mapWidth + vertMap.x];
 
 			wallPercentageHit = vertRes.y / CELL_SIZEF;
-
 			wallPercentageHit = wallPercentageHit - floorf(wallPercentageHit);
+
+			results->normal = VEC2F2_1(F(-1 + (vertRes.x < from.x) * 2), 0);
 
 			if (cos < -0.001f)
 			{
@@ -176,7 +175,7 @@ void castRay(vec2f from, float angle, rayResults* results)
 		}
 
 		rayData* wallData = &(results->results[results->resultCount++]);
-		
+
 		wallData->globalPosHit = vertRes;
 		wallData->rayLength = vDist;
 		wallData->wallTileHit = mapTile - 1;
@@ -196,6 +195,8 @@ void castRay(vec2f from, float angle, rayResults* results)
 			results->results = vHits;
 			results->resultCount = vHitCount;
 		}
+
+		results->normal = VEC2F2_1(0, 0);
 	}
 
 	//return (rayData){true, vertRes, vertMap, vDist, mapTile - 1, wallPercentageHit};

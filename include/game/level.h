@@ -26,15 +26,20 @@ struct rayResults
 {
 	rayData* results;
 	int resultCount;
+	// the normal of the final collision. probably just (0, 0) on mobs
+	vec2f normal;
 } typedef rayResults;
-
 
 // --------------------------------------------------------- 
 // implemented in levelLogic.c
+extern int mapWidth, mapHeight;
+extern int map[];
+
 void levelLogicInit(void);
 void levelUpdate(void);
 
 void castRay(vec2f from, float direction, rayResults* results);
+#define castRayV(from, vec, results) castRay(from, atan2f(vec.y, vec.x), results)
 
 // ---------------------------------------------------------
 // implemented in levelRendering.c
