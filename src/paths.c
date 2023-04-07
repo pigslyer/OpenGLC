@@ -13,8 +13,10 @@ const char* const BASIC2D_MODULATE_FRAG = "shaders/basicUniformModulate.frag";
 
 const char* const LINE_FROM_XY_VERT = "shaders/lineFromXYoffsets.vert";
 const char* const LINE_FROM_XY_VERTEX_VERT = "shaders/lineFromXYVertexoffsets.vert";
+const char* const LINE_FROM_XY_POINT_UNIFORM_OFFSET_VERT = "shaders/lineFromXYPointUniformOffsets.vert";
 
 const char* const FRAG_EQUALS_MODULATE_UNIFORM_FRAG = "shaders/fragEqualsModulateUniform.frag";
+const char* const GL_POSITION_EQUALS_UV_2 = "shaders/glPositionEqualsUV2.vert";
 
 /// -------------------------------------------------------------
 /// TEXTURES
