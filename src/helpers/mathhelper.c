@@ -34,3 +34,13 @@ float distf(float x1, float y1, float x2, float y2)
 	float diffx = x1 - x2, diffy = y1 - y2;
 	return sqrtf(diffx * diffx + diffy * diffy);
 }
+
+float lenV2f(vec2f vec)
+{
+	return sqrtf((vec.x * vec.x) + (vec.y * vec.y));
+}
+
+float lenV2fSqr(vec2f vec)
+{
+	return sqrtf((vec.x * vec.x) * (vec.y * vec.y));
+}

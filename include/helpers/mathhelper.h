@@ -17,6 +17,7 @@
 #define MAX(val1, val2) ((val1) > (val2) ? (val1) : (val2))
 #define MIN(val1, val2) ((val1) < (val2) ? (val1) : (val2))
 #define ABS(value) ((value) > 0 ? (value) : (-value))
+#define SQR(value) ((value) * (value))
 
 #define LIN_MAP(value, omin, omax, nmin, nmax) (((value) - (omin)) / ((omax) - (omin)) * ((nmax) - (nmin)) + (nmin))
 
@@ -49,5 +50,8 @@ bool isZeroApproxf(float what);
 
 float distV2f(vec2f a, vec2f b);
 float distf(float x1, float y1, float x2, float y2);
+
+float lenV2f(vec2f vec);
+float lenV2fSqr(vec2f vec);
 
 #endif
