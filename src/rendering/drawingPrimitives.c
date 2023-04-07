@@ -37,6 +37,22 @@ void drawPrimitivesClear(void)
 	clearVbos(primitivesVbo);
 }
 
+void getCircleUVs(vec2f center, float radius, int precision, float* uvs)
+{
+	float radiusX = LIN_MAP(radius, 0, F(VIEWPORT_WIDTH), 0, 2.0f);
+	float radiusY = LIN_MAP(radius, 0, F(VIEWPORT_HEIGHT), 0, 2.0f);
+	float segmentAngle = TAUf / F(precision);
+
+	float phi = 0, sin, cos;
+	for (int i = 0; i < precision; i++, phi += segmentAngle)
+	{
+		sincosf(phi, &sin, &cos);
+		uvs[i * 2 + 0] = center.x + radiusX * cos;
+		uvs[i * 2 + 1] = center.y + radiusY * sin;
+	}
+}
+
+
 // glLineWidth doesn't make lines wide enough for my needs, so we're faking it with quads
 void drawLineColoredv(vec2f from, vec2f to, float width, vec4f color)
 {

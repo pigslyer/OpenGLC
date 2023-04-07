@@ -310,6 +310,8 @@ void levelDraw(void)
 		const float anchorLeft = -0.8f, anchorRight = 0.8f, anchorTop = -0.8f, anchorBottom = 0.8f;
 		const float viewportWidth = anchorRight - anchorLeft, viewportHeight = anchorBottom - anchorTop;
 
+
+		// background
 		float rect[] = 
 		{
 			// triangle 1
@@ -343,6 +345,7 @@ void levelDraw(void)
 
 		glDrawArrays(GL_TRIANGLES, 0, sizeof(rect) / sizeof(float));
 
+		// walls
 		const float tileOffset = 0.001f;
 		float tileWidth = viewportWidth / F(mapWidth), tileHeight = viewportHeight / F(mapHeight);
 
@@ -390,16 +393,54 @@ void levelDraw(void)
 		glBufferData(GL_ARRAY_BUFFER, I(sizeof(float) * pos), buffers[OVERHEAD_COORDS], GL_DYNAMIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, I(pos / 2));
 
+		// player circle
 		vec2f mappedPlayer = VEC2F2_1(
-			LIN_MAP(playerPosition.x, 0, mapWidth * 64, anchorLeft, anchorRight),
-			LIN_MAP(playerPosition.y, 0, mapHeight * 64, anchorTop, anchorBottom)
+			LIN_MAP(playerPosition.x, 0, F(mapWidth * 64), anchorLeft, anchorRight),
+			LIN_MAP(playerPosition.y, F(mapHeight * 64), 0, anchorTop, anchorBottom)
 		);
 
-		float playerPos[] = 
-		{
-			
-		};
+		getCircleUVs(mappedPlayer, 10, 100, buffers[OVERHEAD_COORDS]);
 
-		
+		glBufferData(GL_ARRAY_BUFFER, 200 * sizeof(float), buffers[OVERHEAD_COORDS], GL_DYNAMIC_DRAW);
+		glDrawArrays(GL_LINE_LOOP, 0, 100);
+
+		// player sight lines
+
+		rayResults coll;
+		rayData* wallData;
+
+		castRay(playerPosition, playerRotation - F(PLAYER_FOV / 2), &coll);
+
+		if (coll.resultCount > 0 && (wallData = &(coll.results[coll.resultCount - 1]))->mobData == NULL)
+		{
+			float ray[] = 
+			{
+				mappedPlayer.x, mappedPlayer.y,
+				LIN_MAP(wallData->globalPosHit.x, 0, F(mapWidth * 64), anchorLeft, anchorRight),
+				LIN_MAP(wallData->globalPosHit.y, F(mapHeight * 64), 0, anchorTop, anchorBottom),
+			};
+
+			glBufferData(GL_ARRAY_BUFFER, sizeof(ray), ray, GL_DYNAMIC_DRAW);
+			glDrawArrays(GL_LINES, 0, 2);
+
+		}
+
+		castRay(playerPosition, playerRotation + F(PLAYER_FOV / 2), &coll);
+
+		if (coll.resultCount > 0 && (wallData = &(coll.results[coll.resultCount - 1]))->mobData == NULL)
+		{
+			float ray[] = 
+			{
+				mappedPlayer.x, mappedPlayer.y,
+				LIN_MAP(wallData->globalPosHit.x, 0, F(mapWidth * 64), anchorLeft, anchorRight),
+				LIN_MAP(wallData->globalPosHit.y, F(mapHeight * 64), 0, anchorTop, anchorBottom),
+			};
+
+			glBufferData(GL_ARRAY_BUFFER, sizeof(ray), ray, GL_DYNAMIC_DRAW);
+			glDrawArrays(GL_LINES, 0, 2);
+
+		}
+
+
 	}
 }
