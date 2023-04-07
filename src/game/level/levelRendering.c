@@ -393,18 +393,28 @@ void levelDraw(void)
 		glBufferData(GL_ARRAY_BUFFER, I(sizeof(float) * pos), buffers[OVERHEAD_COORDS], GL_DYNAMIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, I(pos / 2));
 
+		const float playerRadius = 10;
+
 		// player circle
 		vec2f mappedPlayer = VEC2F2_1(
 			LIN_MAP(playerPosition.x, 0, F(mapWidth * 64), anchorLeft, anchorRight),
 			LIN_MAP(playerPosition.y, F(mapHeight * 64), 0, anchorTop, anchorBottom)
 		);
 
-		getCircleUVs(mappedPlayer, 10, 100, buffers[OVERHEAD_COORDS]);
+		getCircleUVs(mappedPlayer, playerRadius, 100, buffers[OVERHEAD_COORDS]);
 
 		glBufferData(GL_ARRAY_BUFFER, 200 * sizeof(float), buffers[OVERHEAD_COORDS], GL_DYNAMIC_DRAW);
 		glDrawArrays(GL_LINE_LOOP, 0, 100);
 
 		// player sight lines
+
+		float sin, cos;
+		sincosf(playerRotation, &sin, &cos);
+
+		vec2f playerEyes = VEC2F2_1(
+			mappedPlayer.x + LIN_MAP(playerRadius, 0, F(SCREEN_WIDTH), 0, 2) * cos,
+			mappedPlayer.y + LIN_MAP(playerRadius, 0, F(SCREEN_HEIGHT), 0, 2) * sin
+		);
 
 		rayResults coll;
 		rayData* wallData;
@@ -415,7 +425,7 @@ void levelDraw(void)
 		{
 			float ray[] = 
 			{
-				mappedPlayer.x, mappedPlayer.y,
+				playerEyes.x, playerEyes.y,
 				LIN_MAP(wallData->globalPosHit.x, 0, F(mapWidth * 64), anchorLeft, anchorRight),
 				LIN_MAP(wallData->globalPosHit.y, F(mapHeight * 64), 0, anchorTop, anchorBottom),
 			};
@@ -431,7 +441,7 @@ void levelDraw(void)
 		{
 			float ray[] = 
 			{
-				mappedPlayer.x, mappedPlayer.y,
+				playerEyes.x, playerEyes.y,
 				LIN_MAP(wallData->globalPosHit.x, 0, F(mapWidth * 64), anchorLeft, anchorRight),
 				LIN_MAP(wallData->globalPosHit.y, F(mapHeight * 64), 0, anchorTop, anchorBottom),
 			};
