@@ -393,7 +393,7 @@ void levelDraw(void)
 		glBufferData(GL_ARRAY_BUFFER, I(sizeof(float) * pos), buffers[OVERHEAD_COORDS], GL_DYNAMIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, I(pos / 2));
 
-		const float playerRadius = 10;
+		const float playerRadius = 8;
 
 		// player circle
 		vec2f mappedPlayer = VEC2F2_1(

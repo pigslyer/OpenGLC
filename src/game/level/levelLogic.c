@@ -22,6 +22,7 @@ int map[] =
 	1,1,1,1,1,1,1,1,
 };
 
+// calling this twice with different rayResults*'s may cause 1 call to be undefined
 void castRay(vec2f from, float angle, rayResults* results)
 {
 	// a pair of static tables we fill in as needed. they'll exist outside of all scopes,
@@ -198,9 +199,6 @@ void castRay(vec2f from, float angle, rayResults* results)
 
 		results->normal = VEC2F2_1(0, 0);
 	}
-
-	//return (rayData){true, vertRes, vertMap, vDist, mapTile - 1, wallPercentageHit};
-
 }
 
 void levelLogicInit(void)
